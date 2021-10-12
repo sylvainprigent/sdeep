@@ -163,7 +163,7 @@ class RestorationPatchDataset(Dataset):
         target_patch = np.ascontiguousarray(target_patch)
 
         # to tensor
-        return (torch.from_numpy(source_patch).view(1, 1, *source_patch.shape)
+        return (torch.from_numpy(source_patch).view(1, *source_patch.shape)
                 .float(),
-                torch.from_numpy(target_patch).view(1, 1, *target_patch.shape)
+                torch.from_numpy(target_patch).view(1, *target_patch.shape)
                 .float())

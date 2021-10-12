@@ -10,11 +10,11 @@ if __name__ == "__main__":
     loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    source_dir = ''
-    target_dir = ''
-    train_dataset = RestorationPatchDataset(source_dir,
-                                            target_dir,
-                                            patch_size=64,
+    train_source_dir = '/home/sprigent/Documents/datasets/airbus/original_250_small/train/noise120/'
+    train_target_dir = '/home/sprigent/Documents/datasets/airbus/original_250_small/train/GT'
+    train_dataset = RestorationPatchDataset(train_source_dir,
+                                            train_target_dir,
+                                            patch_size=40,
                                             stride=10,
                                             use_data_augmentation=True)
     train_data_loader = DataLoader(train_dataset,
@@ -22,9 +22,11 @@ if __name__ == "__main__":
                                    shuffle=True,
                                    drop_last=True,
                                    num_workers=0)
-    test_dataset = RestorationDataset(source_dir,
-                                      target_dir,
-                                      patch_size=None,
+
+    test_source_dir = '/home/sprigent/Documents/datasets/airbus/original_250_small/test/noise120/'
+    test_target_dir = '/home/sprigent/Documents/datasets/airbus/original_250_small/test/GT/'
+    test_dataset = RestorationDataset(test_source_dir,
+                                      test_target_dir,
                                       use_data_augmentation=False)
     test_data_loader = DataLoader(test_dataset,
                                   batch_size=3,

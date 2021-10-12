@@ -45,6 +45,7 @@ class SWorkflow:
 
         self.logger = SummaryWriter()
         self.progress = SProgressBar()
+        self.progress.prefix = 'SWorkflow'
 
         self.current_epoch = -1
 
@@ -53,8 +54,13 @@ class SWorkflow:
 
         This method can be used to log data or print console messages
         """
-        self.logger.add_graph(self.model)
+        num_parameters = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+
+        dummy_input = torch.rand(1, 1, 40, 40).to(self.device)
+        self.logger.add_graph(self.model, dummy_input)
+        self.logger.flush()
         self.progress.message(f"Using {self.device} device")
+        self.progress.message(f"Model number of parameters: {num_parameters:d}")
 
     def after_train(self):
         """Instructions runs after the train.

@@ -45,8 +45,6 @@ class DnCNN(nn.Module):
                                 kernel_size=kernel_size, padding=padding,
                                 bias=False))
         self.dncnn = nn.Sequential(*layers)
-        print(
-            sum(p.numel() for p in self.dncnn.parameters() if p.requires_grad))
 
     def forward(self, x):
         """Network forward method
