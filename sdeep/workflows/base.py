@@ -30,7 +30,8 @@ class SWorkflow:
         Data loader to iterate a testing dataset
 
     """
-
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-arguments
     def __init__(self, model, loss_fn, optimizer, train_data_loader,
                  val_data_loader, epochs=50):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -84,7 +85,7 @@ class SWorkflow:
             Dictionary of metadata to log or process
 
         """
-        prefix = f"Epoch = " + "{self.current_epoch:d}"
+        prefix = f"Epoch = {self.current_epoch:d}"
         loss_str = "{data['loss']:.2f}"
         full_time_str = time.strftime("%H:%M:%S", data['full_time'])
         remains_str = time.strftime("%H:%M:%S", data['remain_time'])

@@ -102,7 +102,8 @@ class RestorationPatchDataset(Dataset):
         90, 180, 270 degrees rotations and flip (horizontal or vertical)
 
     """
-
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-arguments
     def __init__(self, source_dir, target_dir, patch_size=40, stride=10,
                  use_data_augmentation=True):
         self.source_dir = source_dir
@@ -162,9 +163,7 @@ class RestorationPatchDataset(Dataset):
         target_patch = np.ascontiguousarray(target_patch)
 
         # to tensor
-        source_patch_tensor = torch.from_numpy(source_patch).view(1, 1,
-                                                                  *source_patch.shape).float()
-        target_patch_tensor = torch.from_numpy(target_patch).view(1, 1,
-                                                                  *target_patch.shape).float()
-
-        return source_patch_tensor, target_patch_tensor
+        return (torch.from_numpy(source_patch).view(1, 1, *source_patch.shape)
+                .float(),
+                torch.from_numpy(target_patch).view(1, 1, *target_patch.shape)
+                .float())
