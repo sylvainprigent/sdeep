@@ -1,3 +1,4 @@
+import os
 import torch
 from torch.utils.data import DataLoader
 from sdeep.models import DnCNN
@@ -6,7 +7,7 @@ from sdeep.datasets import RestorationPatchDataset, RestorationDataset
 
 
 if __name__ == "__main__":
-    model = DnCNN()
+    model = DnCNN(num_of_layers=8, channels=1, features=64)
     loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
@@ -39,3 +40,4 @@ if __name__ == "__main__":
                        test_data_loader,
                        epochs=50)
     scheme.fit()
+    scheme.save(os.path.join("saved_models/dncnn8_original_250_small.pt"))

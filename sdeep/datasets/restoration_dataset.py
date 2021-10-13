@@ -74,9 +74,9 @@ class RestorationDataset(Dataset):
 
         # to tensor
         source_patch_tensor = torch.from_numpy(img_source_np).\
-            view(1, 1, * img_source_np.shape).float()
+            view(1, * img_source_np.shape).float()
         target_patch_tensor = torch.from_numpy(img_target_np).\
-            view(1, 1, *img_target_np.shape).float()
+            view(1, *img_target_np.shape).float()
 
         return source_patch_tensor, target_patch_tensor
 

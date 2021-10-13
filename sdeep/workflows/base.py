@@ -6,11 +6,12 @@ SWorkflow
 
 """
 
-import time
+from timeit import default_timer as timer
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
 from sdeep.utils.progress import SProgressBar
+from sdeep.utils.utils import seconds2str
 
 
 class SWorkflow:
@@ -67,6 +68,7 @@ class SWorkflow:
 
         This method can be used to log data or print console messages
         """
+        self.progress.new_line()
         self.logger.close()
 
     def after_train_step(self, data):
@@ -92,12 +94,12 @@ class SWorkflow:
 
         """
         prefix = f"Epoch = {self.current_epoch:d}"
-        loss_str = "{data['loss']:.2f}"
-        full_time_str = time.strftime("%H:%M:%S", data['full_time'])
-        remains_str = time.strftime("%H:%M:%S", data['remain_time'])
-        suffix = str(data['id_batch'] + 1) + '/' + str(data['total_batch']) + \
+        loss_str = f"{data['loss']:.2f}"
+        full_time_str = seconds2str(int(data['full_time']))
+        remains_str = seconds2str(int(data['remain_time']))
+        suffix = str(data['id_batch']) + '/' + str(data['total_batch']) + \
                  '   [' + full_time_str + '<' + remains_str + ', loss=' + \
-                 loss_str + ']'
+                 loss_str + ']     '
         self.progress.progress(data['id_batch'],
                                data['total_batch'],
                                prefix=prefix,
@@ -109,8 +111,10 @@ class SWorkflow:
         self.model.train()
         step_loss = 0
         full_time = 0
+        count_step = 0
+        tic = timer()
         for batch, (x, y) in enumerate(self.train_data_loader):
-            tic = time.perf_counter()
+            count_step += 1
             x, y = x.to(self.device), y.to(self.device)
 
             # Compute prediction error
@@ -124,23 +128,22 @@ class SWorkflow:
             self.optimizer.step()
 
             # count time
-            toc = time.perf_counter()
-            delay = toc - tic
-            full_time += delay
-            total_batch = size / len(x)
-            remains = (total_batch - batch) * delay
+            toc = timer()
+            full_time = toc - tic
+            total_batch = int(size / len(x))
+            remains = full_time * (total_batch - (batch+1)) / (batch+1)
 
             self.after_train_batch({'loss': loss,
-                                    'id_batch': batch,
+                                    'id_batch': batch+1,
                                     'total_batch': total_batch,
-                                    'remain_time': remains,
-                                    'full_time': full_time
+                                    'remain_time': int(remains+0.5),
+                                    'full_time': int(full_time+0.5)
                                     })
             # if batch % 100 == 0:
             #    loss, current = loss.item(), batch * len(X)
             #    print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
-        return {'train_loss': step_loss}
+        return {'train_loss': step_loss/count_step}
 
     def after_val_step(self, data):
         """Instructions runs after one train step.
@@ -189,7 +192,6 @@ class SWorkflow:
         self.before_train()
         for epoch in range(self.epochs):
             self.current_epoch = epoch
-            print(f"Epoch {epoch + 1}\n-------------------------------")
             train_data = self.train_step()
             self.after_train_step(train_data)
             if self.val_data_loader:
@@ -229,8 +231,8 @@ class SWorkflow:
         filename: str
             Path to the destination file
         """
-        # self.model.save(self.model.state_dict(), filename)
-        torch.save(self.model, filename)
+        torch.save(self.model.state_dict(), filename)
+        # torch.save(self.model, filename)
 
     def load(self, filename):
         """Load a model from file
@@ -240,5 +242,5 @@ class SWorkflow:
         filename: str
             Path of the file containing the model
         """
-        # self.model.load_state_dict(torch.load(filename))
-        self.model = torch.load(filename)
+        self.model.load_state_dict(torch.load(filename))
+        # self.model = torch.load(filename)

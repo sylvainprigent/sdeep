@@ -25,7 +25,7 @@ class DnCNN(nn.Module):
 
     """
 
-    def __init__(self, num_of_layers=8, channels=1, features=64):
+    def __init__(self, num_of_layers=17, channels=1, features=64):
         super().__init__()
 
         kernel_size = 3

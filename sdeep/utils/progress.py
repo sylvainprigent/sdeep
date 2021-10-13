@@ -22,6 +22,10 @@ class SProgressLogger:
     def __init__(self):
         self.prefix = ''
 
+    def new_line(self):
+        """Print a new line in the log"""
+        print(f'\n')
+
     def message(self, message):
         """Log a default message
 
