@@ -4,4 +4,6 @@ Set of tools to use sdeep with a command line interface
 
 """
 
-__all__ = []
+from .factory import sdeepModules
+
+__all__ = ['sdeepModules']
