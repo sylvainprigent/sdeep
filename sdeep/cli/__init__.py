@@ -1,9 +1,12 @@
 """CLI module
 
-Set of tools to use sdeep with a command line interface
+Set of tools to use SDeep with a command line interface
 
 """
 
-from .factory import sdeepModules
+from .models_factory import sdeepModels
+from .losses_factory import sdeepLosses
 
-__all__ = ['sdeepModules']
+__all__ = ['sdeepModels',
+           'sdeepLosses'
+           ]

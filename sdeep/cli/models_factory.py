@@ -1,7 +1,7 @@
-"""SDeep service provider.
+"""SDeep Models factory.
 
 This module implements factory to instantiate all the available
-modules of SDeep
+models of SDeep
 
 Classes
 -------
@@ -14,8 +14,7 @@ from sdeep.models import DnCNN
 
 
 class DnCNNBuilder(SDeepModuleBuilder):
-    """Service builder for the process service"""
-
+    """Service builder for the DnCNN model"""
     def __init__(self):
         super().__init__()
 
@@ -36,5 +35,5 @@ class DnCNNBuilder(SDeepModuleBuilder):
                 }
 
 
-sdeepModules = SDeepModulesFactory()
-sdeepModules.register_builder('DnCNN', DnCNNBuilder())
+sdeepModels = SDeepModulesFactory()
+sdeepModels.register_builder('DnCNN', DnCNNBuilder())

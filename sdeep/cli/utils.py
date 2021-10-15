@@ -140,7 +140,7 @@ class SDeepModuleBuilder:
         return default_value
 
     @staticmethod
-    def get_arg_float(args, key, default_value):
+    def get_arg_str(args, key, default_value):
         """Get the value of a parameter from the args list
 
         The default value of the parameter is returned if the
