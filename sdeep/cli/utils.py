@@ -9,8 +9,71 @@ ObjectFactory
 """
 
 
-class SDeepModulesFactory:
-    """Factory for SDeep modules
+def get_arg_int(args, key, default_value):
+    """Get the value of a parameter from the args list
+
+    The default value of the parameter is returned if the
+    key is not in args
+
+    Parameters
+    ----------
+    args: dict
+        Dictionary of the input args
+    key: str
+        Name of the parameters
+    default_value: int
+        Default value of the parameter
+
+    """
+    if key in args:
+        return int(args[key])
+    return default_value
+
+
+def get_arg_float(args, key, default_value):
+    """Get the value of a parameter from the args list
+
+    The default value of the parameter is returned if the
+    key is not in args
+
+    Parameters
+    ----------
+    args: dict
+        Dictionary of the input args
+    key: str
+        Name of the parameters
+    default_value: float
+        Default value of the parameter
+
+    """
+    if key in args:
+        return float(args[key])
+    return default_value
+
+
+def get_arg_str(args, key, default_value):
+    """Get the value of a parameter from the args list
+
+    The default value of the parameter is returned if the
+    key is not in args
+
+    Parameters
+    ----------
+    args: dict
+        Dictionary of the input args
+    key: str
+        Name of the parameters
+    default_value: str
+        Default value of the parameter
+
+    """
+    if key in args:
+        return str(args[key])
+    return default_value
+
+
+class SDeepAbstractFactory:
+    """Define the common methods of all factories
 
     """
     def __init__(self):
@@ -27,22 +90,6 @@ class SDeepModulesFactory:
             Builder instance
         """
         self._builders[key] = builder
-
-    def get_instance(self, key, args):
-        """Get the instance of the SDeep module
-
-        Parameters
-        ----------
-        key: str
-            Name of the module to load
-        args: dict
-            Dictionary of CLI args for models parameters (ex: number of channels)
-
-        """
-        builder = self._builders.get(key)
-        if not builder:
-            raise ValueError(key)
-        return builder.get_instance(args)
 
     def get_parameters(self, key):
         """Get the parameters of the SDeep module
@@ -66,6 +113,27 @@ class SDeepModulesFactory:
 
         """
         return self._builders.keys()
+
+
+class SDeepModulesFactory(SDeepAbstractFactory):
+    """Factory for SDeep modules
+
+    """
+    def get_instance(self, key, args):
+        """Get the instance of the SDeep module
+
+        Parameters
+        ----------
+        key: str
+            Name of the module to load
+        args: dict
+            Dictionary of CLI args for models parameters (ex: number of channels)
+
+        """
+        builder = self._builders.get(key)
+        if not builder:
+            raise ValueError(key)
+        return builder.get_instance(args)
 
 
 class SDeepModuleBuilder:
@@ -97,65 +165,196 @@ class SDeepModuleBuilder:
         """
         raise NotImplementedError
 
-    @staticmethod
-    def get_arg_int(args, key, default_value):
-        """Get the value of a parameter from the args list
 
-        The default value of the parameter is returned if the
-        key is not in args
+class SDeepOptimizersFactory(SDeepAbstractFactory):
+    """Factory for SDeep modules
 
-        Parameters
-        ----------
-        args: dict
-            Dictionary of the input args
-        key: str
-            Name of the parameters
-        default_value: int
-            Default value of the parameter
-
-        """
-        if key in args:
-            return int(args[key])
-        return default_value
-
-    @staticmethod
-    def get_arg_float(args, key, default_value):
-        """Get the value of a parameter from the args list
-
-        The default value of the parameter is returned if the
-        key is not in args
+    """
+    def get_instance(self, key, model, args):
+        """Get the instance of the SDeep module
 
         Parameters
         ----------
-        args: dict
-            Dictionary of the input args
         key: str
-            Name of the parameters
-        default_value: float
-            Default value of the parameter
+            Name of the module to load
+        model: nn.Module
+            Neural network model
+        args: dict
+            Dictionary of CLI args for models parameters (ex: number of channels)
 
         """
-        if key in args:
-            return float(args[key])
-        return default_value
+        builder = self._builders.get(key)
+        if not builder:
+            raise ValueError(key)
+        return builder.get_instance(model, args)
 
-    @staticmethod
-    def get_arg_str(args, key, default_value):
-        """Get the value of a parameter from the args list
 
-        The default value of the parameter is returned if the
-        key is not in args
+class SDeepOptimizerBuilder:
+    """Interface for a SDeep optimizer builder
+
+    The builder is used by the factory to instantiate an optimizer
+
+    """
+    def __init__(self):
+        self._instance = None
+
+    def get_instance(self, model, args):
+        """Get the instance of the module
 
         Parameters
         ----------
+        model: nn.Module
+            Neural network model
         args: dict
-            Dictionary of the input args
-        key: str
-            Name of the parameters
-        default_value: str
-            Default value of the parameter
+            dict of parameters (key:value)
+
+        Returns
+        -------
+        Object: instance of the SDeep module
 
         """
-        if key in args:
-            return str(args[key])
-        return default_value
+        raise NotImplementedError
+
+    def get_parameters(self):
+        """Get the parameters of the module
+
+        Returns
+        -------
+        dict: dictionary of key:value for each parameters
+
+        """
+        raise NotImplementedError
+
+
+class SDeepDatasetsFactory(SDeepAbstractFactory):
+    """Factory for SDeep datasets
+
+    """
+    def get_instance(self, key, dataset_path, args):
+        """Get the instance of the SDeep dataset
+
+        Parameters
+        ----------
+        key: str
+            Name of the module to load
+        args: dict
+            Dictionary of CLI args for models parameters (ex: number of channels)
+
+        """
+        builder = self._builders.get(key)
+        if not builder:
+            raise ValueError(key)
+        return builder.get_instance(dataset_path, args)
+
+
+class SDeepDatasetBuilder:
+    """Interface for a SDeep module builder
+
+    The builder is used by the factory to instantiate a module
+
+    """
+    def __init__(self):
+        self._instance = None
+
+    def get_instance(self, dataset_path, args):
+        """Get the instance of the module
+
+        Returns
+        -------
+        Object: instance of the SDeep module
+
+        """
+        raise NotImplementedError
+
+    def get_parameters(self):
+        """Get the parameters of the module
+
+        Returns
+        -------
+        dict: dictionary of key:value for each parameters
+
+        """
+        raise NotImplementedError
+
+
+class SDeepWorkflowsFactory(SDeepAbstractFactory):
+    """Factory for SDeep workflow
+
+    """
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-arguments
+    def get_instance(self, key, model, loss_fn, optimizer,
+                     train_data_loader, test_data_loader, args):
+        """Get the instance of the SDeep dataset
+
+        Parameters
+        ----------
+        key: str
+            Name of the module to load
+        model: nn.Module
+            Neural network model
+        loss_fn: nn.Module
+            Loss function
+        optimiser: Object
+            Neural network train optimization function
+        train_data_loader: Object
+            Data loader for training set
+        test_data_loader: Object
+            Data loader for validation set
+        args: dict
+            Dictionary of CLI args for models parameters (ex: number of iteration)
+
+        """
+        builder = self._builders.get(key)
+        if not builder:
+            raise ValueError(key)
+        return builder.get_instance(model, loss_fn, optimizer,
+                                    train_data_loader,
+                                    test_data_loader, args)
+
+
+class SDeepWorkflowBuilder:
+    """Interface for a SDeep workflow builder
+
+    The builder is used by the factory to instantiate a workflow
+
+    """
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-arguments
+    def __init__(self):
+        self._instance = None
+
+    def get_instance(self, model, loss_fn, optimizer, train_data_loader, test_data_loader, args):
+        """Get the instance of the module
+
+        Parameters
+        ----------
+        model: nn.Module
+            Neural network model
+        loss_fn: nn.Module
+            Loss function
+        optimiser: Object
+            Neural network train optimization function
+        train_data_loader: Object
+            Data loader for training set
+        test_data_loader: Object
+            Data loader for validation set
+        args: dict
+            parameters dictionary
+
+        Returns
+        -------
+        Object: instance of the SDeep module
+
+        """
+        raise NotImplementedError
+
+    def get_parameters(self):
+        """Get the parameters of the module
+
+        Returns
+        -------
+        dict: dictionary of key:value for each parameters
+
+        """
+        raise NotImplementedError

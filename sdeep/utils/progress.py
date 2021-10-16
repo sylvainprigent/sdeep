@@ -24,7 +24,7 @@ class SProgressLogger:
 
     def new_line(self):
         """Print a new line in the log"""
-        print(f'\n')
+        print('\n')
 
     def message(self, message):
         """Log a default message

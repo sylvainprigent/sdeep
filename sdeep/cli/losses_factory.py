@@ -13,14 +13,12 @@ Objects
 sdeepLosses
 
 """
+import torch
 from .utils import SDeepModulesFactory, SDeepModuleBuilder
 
 
 class MSELossBuilder(SDeepModuleBuilder):
     """Service builder for the MSE loss"""
-    def __init__(self):
-        super().__init__()
-
     def get_instance(self, args):
         if not self._instance:
             self._instance = torch.nn.MSELoss()

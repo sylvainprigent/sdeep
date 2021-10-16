@@ -8,16 +8,12 @@ Classes
 SDeepServiceProvider
 
 """
-
-from .utils import SDeepModulesFactory, SDeepModuleBuilder
 from sdeep.models import DnCNN
+from .utils import SDeepModulesFactory, SDeepModuleBuilder
 
 
 class DnCNNBuilder(SDeepModuleBuilder):
     """Service builder for the DnCNN model"""
-    def __init__(self):
-        super().__init__()
-
     def get_instance(self, args):
         if not self._instance:
             num_of_layers = self.get_arg_int(args, 'dncnn_layers', 17)
