@@ -25,8 +25,8 @@ def get_arg_int(args, key, default_value):
         Default value of the parameter
 
     """
-    if key in args:
-        return int(args[key])
+    if hasattr(args, key):
+        return int(getattr(args, key))
     return default_value
 
 
@@ -46,8 +46,8 @@ def get_arg_float(args, key, default_value):
         Default value of the parameter
 
     """
-    if key in args:
-        return float(args[key])
+    if hasattr(args, key):
+        return float(getattr(args, key))
     return default_value
 
 
@@ -67,8 +67,8 @@ def get_arg_str(args, key, default_value):
         Default value of the parameter
 
     """
-    if key in args:
-        return str(args[key])
+    if hasattr(args, key):
+        return str(getattr(args, key))
     return default_value
 
 
@@ -96,7 +96,7 @@ class SDeepAbstractFactory:
 
         Returns
         -------
-        dict: a dictionary of key:value for each parameter
+        list: list of dictionary of key, default, help for each parameter
 
         """
         builder = self._builders.get(key)
@@ -230,7 +230,7 @@ class SDeepDatasetsFactory(SDeepAbstractFactory):
     """Factory for SDeep datasets
 
     """
-    def get_instance(self, key, dataset_path, args):
+    def get_instance(self, key, args):
         """Get the instance of the SDeep dataset
 
         Parameters
@@ -244,7 +244,7 @@ class SDeepDatasetsFactory(SDeepAbstractFactory):
         builder = self._builders.get(key)
         if not builder:
             raise ValueError(key)
-        return builder.get_instance(dataset_path, args)
+        return builder.get_instance(args)
 
 
 class SDeepDatasetBuilder:
@@ -256,7 +256,7 @@ class SDeepDatasetBuilder:
     def __init__(self):
         self._instance = None
 
-    def get_instance(self, dataset_path, args):
+    def get_instance(self, args):
         """Get the instance of the module
 
         Returns

@@ -26,7 +26,10 @@ class AdamBuilder(SDeepOptimizerBuilder):
         return self._instance
 
     def get_parameters(self):
-        return {}
+        return [{'key': 'lr',
+                 'default': 0.001,
+                 'help': 'Learning rate'}
+        ]
 
 
 sdeepOptimizers = SDeepOptimizersFactory()

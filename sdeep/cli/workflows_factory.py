@@ -32,7 +32,10 @@ class SWorkflowBuilder(SDeepWorkflowBuilder):
         return self._instance
 
     def get_parameters(self):
-        return {"epoch": 50}
+        return [{'key': 'epoch',
+                 'default': 50,
+                 'help': 'Number of epoch'}
+        ]
 
 
 sdeepWorkflows = SDeepWorkflowsFactory()
