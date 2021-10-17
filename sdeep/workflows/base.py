@@ -8,9 +8,8 @@ SWorkflow
 
 from timeit import default_timer as timer
 import torch
-from torch.utils.tensorboard import SummaryWriter
 
-from sdeep.utils import SProgressObservable
+from sdeep.utils import SProgressObservable, SDataLogger
 from sdeep.utils.utils import seconds2str
 
 
@@ -44,19 +43,46 @@ class SWorkflow:
         self.val_data_loader = val_data_loader
         self.epochs = epochs
 
-        self.logger = SummaryWriter()
+        self.logger = None
         self.progress = SProgressObservable()
         self.progress.prefix = 'SWorkflow'
 
         self.current_epoch = -1
 
-    def set_progress_observable(self, observer):
-        self.progress = observer
+    def set_data_logger(self, logger: SDataLogger):
+        """Set the data logger to the workflow
+
+        Parameters
+        ----------
+        logger: SDataLogger
+            Preconfigured data logger
+
+        """
+        self.logger = logger
+
+    def set_progress_observable(self, observable):
+        """The the progress logger observable
+
+        Parameters
+        ----------
+        observable: SProgressObservable
+            The progress observable instance
+
+        """
+        self.progress = observable
         self.progress.set_prefix(self.__class__.__name__)
 
     def add_progress_logger(self, logger):
+        """Add one progress logger
+
+        Parameters
+        ----------
+        logger: SProgressLogger
+            Instance of a progress logger
+
+        """
         logger.prefix = self.__class__.__name__
-        self.progress.add_logger(logger)    
+        self.progress.add_logger(logger)
 
     def before_train(self):
         """Instructions runs before the train.

@@ -2,7 +2,7 @@ import os
 import argparse
 from torch.utils.data import DataLoader
 from sdeep.cli import sdeepModels, sdeepLosses, sdeepOptimizers, sdeepDatasets, sdeepWorkflows
-from sdeep.utils import SProgressObservable, SFileLogger, SConsoleLogger
+from sdeep.utils import SProgressObservable, SFileLogger, SConsoleLogger, STensorboardLogger
 
 def add_args_to_parser(parser, factory):
     for name in factory.get_keys():
@@ -73,6 +73,7 @@ if __name__ == "__main__":
                                            val_data_loader,
                                            args)
 
+    # progress Loggers
     observable = SProgressObservable()
     logger_file = SFileLogger(os.path.join(out_dir, 'log.txt'))
     logger_console = SConsoleLogger()
@@ -104,12 +105,12 @@ if __name__ == "__main__":
     observable.message(f"Save directory: {args.save}")
     observable.new_line()
 
+    # data logger
+    data_logger = STensorboardLogger(out_dir)
+    workflow.set_data_logger(data_logger)
+
     workflow.fit()
     workflow.save(os.path.join(args.save, "model.pt"))
 
     logger_file.close()
     logger_console.close()
-
-    # TODO
-    # - put the data_logger and progress loger in same dir 
-    # - create data logger with tensorboard (and local files ?)

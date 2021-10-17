@@ -15,7 +15,7 @@ COLOR_ENDC = '\033[0m'
 class SProgressObservable:
     """Observable pattern
 
-    This pattern allows to set multiple progress logger to 
+    This pattern allows to set multiple progress logger to
     one workflow
 
     """
@@ -23,8 +23,19 @@ class SProgressObservable:
         self._loggers = []
 
     def set_prefix(self, prefix):
+        """Set the prefix for all loggers
+
+        The prefix is a printed str ad the beginning of each
+        line of the logger
+
+        Parameters
+        ----------
+        prefix: str
+            Prefix content
+
+        """
         for logger in self._loggers:
-            logger.prefix = prefix 
+            logger.prefix = prefix
 
     def add_logger(self, logger):
         """Add a logger to the observer
@@ -34,12 +45,12 @@ class SProgressObservable:
         logger: SProgressLogger
             Logger to add to the observer
         """
-        self._loggers.append(logger)    
+        self._loggers.append(logger)
 
     def new_line(self):
         """Print a new line in the loggers"""
         for logger in self._loggers:
-            logger.new_line()   
+            logger.new_line()
 
     def message(self, message):
         """Log a default message
@@ -48,9 +59,9 @@ class SProgressObservable:
         ----------
         message: str
             Message to log
-        """   
+        """
         for logger in self._loggers:
-            logger.message(message)  
+            logger.message(message)
 
     def error(self, message):
         """Log an error message
@@ -59,9 +70,9 @@ class SProgressObservable:
         ----------
         message: str
             Message to log
-        """ 
+        """
         for logger in self._loggers:
-            logger.error(message)  
+            logger.error(message)
 
     def warning(self, message):
         """Log a warning message
@@ -70,9 +81,9 @@ class SProgressObservable:
         ----------
         message: str
             Message to log
-        """ 
+        """
         for logger in self._loggers:
-            logger.warning(message) 
+            logger.warning(message)
 
     def progress(self, iteration, total, prefix, suffix):
         """Log a progress
@@ -87,14 +98,14 @@ class SProgressObservable:
             Text to print before the progress
         suffix: str
             Text to print after the message
-        """     
+        """
         for logger in self._loggers:
-            logger.progress(iteration, total, prefix, suffix)   
+            logger.progress(iteration, total, prefix, suffix)
 
     def close(self):
-        """Close the loggers"""  
+        """Close the loggers"""
         for logger in self._loggers:
-            logger.close()                              
+            logger.close()
 
 
 class SProgressLogger:
@@ -158,15 +169,15 @@ class SProgressLogger:
         raise NotImplementedError()
 
     def close(self):
-        """Close the logger"""   
-        raise NotImplementedError() 
+        """Close the logger"""
+        raise NotImplementedError()
 
 
 class SFileLogger(SProgressLogger):
     """Logger that write logs into txt file"""
     def __init__(self, filepath):
         super().__init__()
-        self.file = open(filepath, 'a')
+        self.file = open(filepath, 'a', encoding="utf8")
 
     def new_line(self):
         self.file.write(f"{self.prefix}:\n")
@@ -183,7 +194,7 @@ class SFileLogger(SProgressLogger):
               f'{message}{COLOR_ENDC}\n')
 
     def progress(self, iteration, total, prefix, suffix):
-        self.file.write(f'{prefix}: iteration {iteration}/{total} ({suffix})\n')              
+        self.file.write(f'{prefix}: iteration {iteration}/{total} ({suffix})\n')
 
     def close(self):
         self.file.close()

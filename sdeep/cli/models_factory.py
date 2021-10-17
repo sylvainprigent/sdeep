@@ -16,7 +16,7 @@ class DnCNNBuilder(SDeepModuleBuilder):
     """Service builder for the DnCNN model"""
     def __init__(self):
         super().__init__()
-        self.parameters = [{'key': 'dncnn_layers', 
+        self.parameters = [{'key': 'dncnn_layers',
                  'default': 17,
                  'value': 17,
                  'help': 'Number of convolutional layers'},

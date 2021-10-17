@@ -13,7 +13,7 @@ Objects
 sdeepLosses
 """
 from sdeep.datasets import RestorationPatchDataset, RestorationDataset
-from .utils import (SDeepDatasetsFactory, SDeepDatasetBuilder, 
+from .utils import (SDeepDatasetsFactory, SDeepDatasetBuilder,
                     get_arg_str, get_arg_int)
 
 class RestorationDatasetBuilder(SDeepDatasetBuilder):
