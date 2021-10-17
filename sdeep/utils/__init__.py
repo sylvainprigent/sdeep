@@ -5,10 +5,11 @@ training and testing
 
 """
 
-from .loggers import SDataLogger
-from .progress import SProgressLogger, SProgressBar
+from .data_loggers import SDataLogger
+from .progress_loggers import SProgressObservable, SFileLogger, SConsoleLogger
 
 __all__ = ['SDataLogger',
-           'SProgressLogger',
-           'SProgressBar'
+           'SProgressObservable',
+           'SFileLogger',
+           'SConsoleLogger'
            ]

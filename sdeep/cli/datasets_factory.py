@@ -13,7 +13,8 @@ Objects
 sdeepLosses
 """
 from sdeep.datasets import RestorationPatchDataset, RestorationDataset
-from .utils import SDeepDatasetsFactory, SDeepDatasetBuilder, get_arg_str
+from .utils import (SDeepDatasetsFactory, SDeepDatasetBuilder, 
+                    get_arg_str, get_arg_int)
 
 class RestorationDatasetBuilder(SDeepDatasetBuilder):
     """Service builder for the RestorationDataset
@@ -45,8 +46,8 @@ class RestorationPatchDatasetBuilder(SDeepDatasetBuilder):
         if not self._instance:
             train_source_dir = get_arg_str(args, 'rpd_path_source', '')
             train_target_dir = get_arg_str(args, 'rpd_path_target', '')
-            patch_size = get_arg_str(args, 'rpd_patch_size', 40)
-            stride = get_arg_str(args, 'rpd_stride', 10)
+            patch_size = get_arg_int(args, 'rpd_patch_size', 40)
+            stride = get_arg_int(args, 'rpd_stride', 10)
             self._instance = RestorationPatchDataset(
                                     train_source_dir,
                                     train_target_dir,

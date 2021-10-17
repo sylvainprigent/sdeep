@@ -10,7 +10,7 @@ from timeit import default_timer as timer
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-from sdeep.utils.progress import SProgressBar
+from sdeep.utils import SProgressObservable
 from sdeep.utils.utils import seconds2str
 
 
@@ -45,10 +45,14 @@ class SWorkflow:
         self.epochs = epochs
 
         self.logger = SummaryWriter()
-        self.progress = SProgressBar()
+        self.progress = SProgressObservable()
         self.progress.prefix = 'SWorkflow'
 
         self.current_epoch = -1
+
+    def add_progress_logger(self, logger):
+        logger.prefix = self.__class__.__name__
+        self.progress.add_logger(logger)    
 
     def before_train(self):
         """Instructions runs before the train.

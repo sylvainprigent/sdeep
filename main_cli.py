@@ -2,6 +2,7 @@ import os
 import argparse
 from torch.utils.data import DataLoader
 from sdeep.cli import sdeepModels, sdeepLosses, sdeepOptimizers, sdeepDatasets, sdeepWorkflows
+from sdeep.utils import SFileLogger, SConsoleLogger
 
 def add_args_to_parser(parser, factory):
     for name in factory.get_keys():
@@ -35,6 +36,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # instantiate
+    out_dir = args.save
     model = sdeepModels.get_instance(args.model, args)
     loss_fn = sdeepLosses.get_instance(args.loss, args)
     optim = sdeepOptimizers.get_instance(args.optim, model, args)
@@ -55,13 +57,21 @@ if __name__ == "__main__":
                                  num_workers=0)
 
     workflow = sdeepWorkflows.get_instance(args.workflow, 
+                                           model,
                                            loss_fn, 
                                            optim,
                                            train_data_loader,
                                            val_data_loader,
                                            args)
 
+    logger_file = SFileLogger(os.path.join(out_dir, 'log.txt'))
+    logger_console = SConsoleLogger()
+    workflow.add_progress_logger(logger_file)
+    workflow.add_progress_logger(logger_console)
     workflow.fit()
     workflow.save(os.path.join(args.save, "model.pt"))
+
+    logger_file.close()
+    logger_console.close()
 
     #print('optim form string = ', getattr(args, 'optim'))
