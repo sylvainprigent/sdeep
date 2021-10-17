@@ -2,7 +2,7 @@ import os
 import argparse
 from torch.utils.data import DataLoader
 from sdeep.cli import sdeepModels, sdeepLosses, sdeepOptimizers, sdeepDatasets, sdeepWorkflows
-from sdeep.utils import SFileLogger, SConsoleLogger
+from sdeep.utils import SProgressObservable, SFileLogger, SConsoleLogger
 
 def add_args_to_parser(parser, factory):
     for name in factory.get_keys():
@@ -64,14 +64,44 @@ if __name__ == "__main__":
                                            val_data_loader,
                                            args)
 
+    observable = SProgressObservable()
     logger_file = SFileLogger(os.path.join(out_dir, 'log.txt'))
     logger_console = SConsoleLogger()
-    workflow.add_progress_logger(logger_file)
-    workflow.add_progress_logger(logger_console)
+    observable.add_logger(logger_file)
+    observable.add_logger(logger_console)
+    workflow.set_progress_observable(observable)
+
+    # log setup
+    observable.message('Start')
+    observable.message(f"Model: {args.model}")
+    for param in sdeepModels.get_parameters(args.model):
+        observable.message(f"    - {param['key']}={param['value']}")
+    observable.message(f"Loss: {args.loss}")
+    for param in sdeepLosses.get_parameters(args.loss):
+        observable.message(f"    - {param['key']}={param['value']}")   
+    observable.message(f"Optimizer: {args.optim}")
+    for param in sdeepOptimizers.get_parameters(args.optim):
+        observable.message(f"    - {param['key']}={param['value']}")      
+    observable.message(f"Train dataset: {args.train_dataset}")
+    for param in sdeepDatasets.get_parameters(args.train_dataset):
+        observable.message(f"    - {param['key']}={param['value']}")  
+    observable.message(f"    - train batch size={args.train_batch_size}")  
+    observable.message(f"Train dataset: {args.val_dataset}")
+    for param in sdeepDatasets.get_parameters(args.val_dataset):
+        observable.message(f"    - {param['key']}={param['value']}")  
+    observable.message(f"Workflow: {args.workflow}")  
+    for param in sdeepWorkflows.get_parameters(args.workflow):
+        observable.message(f"    - {param['key']}={param['value']}")         
+    observable.message(f"Save directory: {args.save}")
+    observable.new_line()
+
     workflow.fit()
     workflow.save(os.path.join(args.save, "model.pt"))
 
     logger_file.close()
     logger_console.close()
 
-    #print('optim form string = ', getattr(args, 'optim'))
+    # TODO
+    # - add subdir with run number and add a new subdir if exists
+    # - put the data_logger and progress loger in same dir 
+    # - create data logger with tensorboard (and local files ?)

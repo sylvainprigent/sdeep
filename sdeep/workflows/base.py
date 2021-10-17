@@ -50,6 +50,10 @@ class SWorkflow:
 
         self.current_epoch = -1
 
+    def set_progress_observable(self, observer):
+        self.progress = observer
+        self.progress.set_prefix(self.__class__.__name__)
+
     def add_progress_logger(self, logger):
         logger.prefix = self.__class__.__name__
         self.progress.add_logger(logger)    
@@ -147,7 +151,9 @@ class SWorkflow:
             #    loss, current = loss.item(), batch * len(X)
             #    print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
-        return {'train_loss': step_loss/count_step}
+        if count_step > 0:
+            step_loss /= count_step
+        return {'train_loss': step_loss}
 
     def after_val_step(self, data):
         """Instructions runs after one train step.
