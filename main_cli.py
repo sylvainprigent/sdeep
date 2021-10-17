@@ -10,6 +10,15 @@ def add_args_to_parser(parser, factory):
         for param in params:
             parser.add_argument(f"--{param['key']}", help=param['help'], default=param['default'])
 
+def get_subdir(main_dir):
+    run_id = 1
+    path = os.path.join(main_dir, f"run_{run_id}")
+    while os.path.isdir(path):
+        run_id += 1
+        path = os.path.join(main_dir, f"run_{run_id}")
+    os.mkdir(path)    
+    return path
+
 
 if __name__ == "__main__":
 
@@ -36,7 +45,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # instantiate
-    out_dir = args.save
+    out_dir = get_subdir(args.save)
     model = sdeepModels.get_instance(args.model, args)
     loss_fn = sdeepLosses.get_instance(args.loss, args)
     optim = sdeepOptimizers.get_instance(args.optim, model, args)
@@ -102,6 +111,5 @@ if __name__ == "__main__":
     logger_console.close()
 
     # TODO
-    # - add subdir with run number and add a new subdir if exists
     # - put the data_logger and progress loger in same dir 
     # - create data logger with tensorboard (and local files ?)
