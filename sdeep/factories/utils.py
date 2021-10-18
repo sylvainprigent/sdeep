@@ -27,6 +27,8 @@ def get_arg_int(args, key, default_value):
     """
     if hasattr(args, key):
         return int(getattr(args, key))
+    if isinstance(args, dict) and key in args:
+        return int(args[key])
     return default_value
 
 
@@ -48,6 +50,8 @@ def get_arg_float(args, key, default_value):
     """
     if hasattr(args, key):
         return float(getattr(args, key))
+    if isinstance(args, dict) and key in args:
+        return float(args[key])
     return default_value
 
 
@@ -69,6 +73,8 @@ def get_arg_str(args, key, default_value):
     """
     if hasattr(args, key):
         return str(getattr(args, key))
+    if isinstance(args, dict) and key in args:
+        return str(args[key])
     return default_value
 
 

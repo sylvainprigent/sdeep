@@ -259,6 +259,16 @@ class SWorkflow:
             pred = self.model(x_device)
         return pred
 
+    def save_model(self, filename):
+        """Save a model to a file
+
+        Parameters
+        ----------
+        filename: str
+            Path to the destination file
+        """
+        torch.save(self.model, filename)
+
     def save(self, filename):
         """Save a model to a file
 
@@ -268,7 +278,7 @@ class SWorkflow:
             Path to the destination file
         """
         torch.save(self.model.state_dict(), filename)
-        # torch.save(self.model, filename)
+        #torch.save(self.model, filename)
 
     def load(self, filename):
         """Load a model from file

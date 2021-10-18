@@ -14,7 +14,7 @@ sdeepLosses
 
 """
 import torch
-from .utils import get_arg_float, SDeepOptimizersFactory, SDeepOptimizerBuilder
+from sdeep.factories.utils import get_arg_float, SDeepOptimizersFactory, SDeepOptimizerBuilder
 
 
 class AdamBuilder(SDeepOptimizerBuilder):

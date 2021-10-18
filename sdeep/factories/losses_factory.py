@@ -14,7 +14,7 @@ sdeepLosses
 
 """
 import torch
-from .utils import SDeepModulesFactory, SDeepModuleBuilder
+from sdeep.factories.utils import SDeepModulesFactory, SDeepModuleBuilder
 
 
 class MSELossBuilder(SDeepModuleBuilder):

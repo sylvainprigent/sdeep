@@ -13,8 +13,9 @@ Objects
 sdeepLosses
 """
 from sdeep.datasets import RestorationPatchDataset, RestorationDataset
-from .utils import (SDeepDatasetsFactory, SDeepDatasetBuilder,
-                    get_arg_str, get_arg_int)
+from sdeep.factories.utils import (SDeepDatasetsFactory, SDeepDatasetBuilder,
+                                   get_arg_str, get_arg_int)
+
 
 class RestorationDatasetBuilder(SDeepDatasetBuilder):
     """Service builder for the RestorationDataset
@@ -25,11 +26,11 @@ class RestorationDatasetBuilder(SDeepDatasetBuilder):
                             'default': '',
                             'value': '',
                             'help': 'Path of the source files'},
-                            {'key': 'rd_path_target',
+                           {'key': 'rd_path_target',
                             'default': '',
                             'value': '',
                             'help': 'Path of the taget files'}
-                            ]
+                           ]
 
     def get_instance(self, args):
         if not self._instance:
@@ -45,6 +46,7 @@ class RestorationDatasetBuilder(SDeepDatasetBuilder):
     def get_parameters(self):
         return self.parameters
 
+
 class RestorationPatchDatasetBuilder(SDeepDatasetBuilder):
     """Service builder for the RestorationPatchDataset
     """
@@ -56,19 +58,19 @@ class RestorationPatchDatasetBuilder(SDeepDatasetBuilder):
                             'default': '',
                             'value': '',
                             'help': 'Path of the source files'},
-                            {'key': 'rpd_path_target',
+                           {'key': 'rpd_path_target',
                             'default': '',
                             'value': '',
                             'help': 'Path of the taget files'},
-                            {'key': 'rpd_patch_size',
+                           {'key': 'rpd_patch_size',
                             'default': 40,
                             'value': 40,
                             'help': 'Size of a training patch'},
-                            {'key': 'rpd_stride',
+                           {'key': 'rpd_stride',
                             'default': 10,
                             'value': 10,
                             'help': 'Stride between two patches'}
-                    ]
+                           ]
 
     def get_instance(self, args):
         if not self._instance:

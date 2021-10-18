@@ -14,7 +14,7 @@ sdeepWorkflows
 
 """
 from sdeep.workflows import SWorkflow
-from .utils import get_arg_int, SDeepWorkflowsFactory, SDeepWorkflowBuilder
+from sdeep.factories.utils import get_arg_int, SDeepWorkflowsFactory, SDeepWorkflowBuilder
 
 
 class SWorkflowBuilder(SDeepWorkflowBuilder):
@@ -23,11 +23,12 @@ class SWorkflowBuilder(SDeepWorkflowBuilder):
     # pylint: disable=too-many-arguments
     def __init__(self):
         super().__init__()
-        self.parameters = [{'key': 'epoch',
+        self.parameters = [{'key': 'epochs',
                             'default': 50,
                             'value': 50,
                             'help': 'Number of epoch'}
-                    ]
+                           ]
+
     def get_instance(self, model, loss_fn, optimizer,
                      train_data_loader, test_data_loader, args):
         if not self._instance:

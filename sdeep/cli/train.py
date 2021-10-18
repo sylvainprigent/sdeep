@@ -1,8 +1,10 @@
 import os
 import argparse
+import torch
 from torch.utils.data import DataLoader
-from sdeep.cli import sdeepModels, sdeepLosses, sdeepOptimizers, sdeepDatasets, sdeepWorkflows
+from sdeep.factories import sdeepModels, sdeepLosses, sdeepOptimizers, sdeepDatasets, sdeepWorkflows
 from sdeep.utils import SProgressObservable, SFileLogger, SConsoleLogger, STensorboardLogger
+
 
 def add_args_to_parser(parser, factory):
     for name in factory.get_keys():
@@ -10,17 +12,18 @@ def add_args_to_parser(parser, factory):
         for param in params:
             parser.add_argument(f"--{param['key']}", help=param['help'], default=param['default'])
 
+
 def get_subdir(main_dir):
     run_id = 1
     path = os.path.join(main_dir, f"run_{run_id}")
     while os.path.isdir(path):
         run_id += 1
         path = os.path.join(main_dir, f"run_{run_id}")
-    os.mkdir(path)    
+    os.mkdir(path)
     return path
 
 
-if __name__ == "__main__":
+def main():
 
     parser = argparse.ArgumentParser(description='SDeep train')
 
@@ -41,7 +44,7 @@ if __name__ == "__main__":
     add_args_to_parser(parser, sdeepOptimizers)
     add_args_to_parser(parser, sdeepDatasets)
     add_args_to_parser(parser, sdeepWorkflows)
-    
+
     args = parser.parse_args()
 
     # instantiate
@@ -52,8 +55,7 @@ if __name__ == "__main__":
     train_dataset = sdeepDatasets.get_instance(args.train_dataset, args)
     val_dataset = sdeepDatasets.get_instance(args.val_dataset, args)
 
-
-    train_data_loader = DataLoader(val_dataset,
+    train_data_loader = DataLoader(train_dataset,
                                    batch_size=int(args.train_batch_size),
                                    shuffle=True,
                                    drop_last=True,
@@ -65,9 +67,9 @@ if __name__ == "__main__":
                                  drop_last=False,
                                  num_workers=0)
 
-    workflow = sdeepWorkflows.get_instance(args.workflow, 
+    workflow = sdeepWorkflows.get_instance(args.workflow,
                                            model,
-                                           loss_fn, 
+                                           loss_fn,
                                            optim,
                                            train_data_loader,
                                            val_data_loader,
@@ -84,24 +86,26 @@ if __name__ == "__main__":
     # log setup
     observable.message('Start')
     observable.message(f"Model: {args.model}")
+    model_args = {}
     for param in sdeepModels.get_parameters(args.model):
         observable.message(f"    - {param['key']}={param['value']}")
+        model_args[param['key']] = param['value']
     observable.message(f"Loss: {args.loss}")
     for param in sdeepLosses.get_parameters(args.loss):
-        observable.message(f"    - {param['key']}={param['value']}")   
+        observable.message(f"    - {param['key']}={param['value']}")
     observable.message(f"Optimizer: {args.optim}")
     for param in sdeepOptimizers.get_parameters(args.optim):
-        observable.message(f"    - {param['key']}={param['value']}")      
+        observable.message(f"    - {param['key']}={param['value']}")
     observable.message(f"Train dataset: {args.train_dataset}")
     for param in sdeepDatasets.get_parameters(args.train_dataset):
-        observable.message(f"    - {param['key']}={param['value']}")  
-    observable.message(f"    - train batch size={args.train_batch_size}")  
+        observable.message(f"    - {param['key']}={param['value']}")
+    observable.message(f"    - train batch size={args.train_batch_size}")
     observable.message(f"Train dataset: {args.val_dataset}")
     for param in sdeepDatasets.get_parameters(args.val_dataset):
-        observable.message(f"    - {param['key']}={param['value']}")  
-    observable.message(f"Workflow: {args.workflow}")  
+        observable.message(f"    - {param['key']}={param['value']}")
+    observable.message(f"Workflow: {args.workflow}")
     for param in sdeepWorkflows.get_parameters(args.workflow):
-        observable.message(f"    - {param['key']}={param['value']}")         
+        observable.message(f"    - {param['key']}={param['value']}")
     observable.message(f"Save directory: {args.save}")
     observable.new_line()
 
@@ -110,7 +114,15 @@ if __name__ == "__main__":
     workflow.set_data_logger(data_logger)
 
     workflow.fit()
-    workflow.save(os.path.join(args.save, "model.pt"))
 
+    torch.save({
+        'model': args.model,
+        'model_args': model_args,
+        'model_state_dict': model.state_dict()
+    }, os.path.join(out_dir, "model.ckpt"))
+
+    #workflow.save_model(os.path.join(out_dir, "model.pt"))
+
+    observable.message(f"Done")
     logger_file.close()
     logger_console.close()

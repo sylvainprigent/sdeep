@@ -9,7 +9,7 @@ SDeepServiceProvider
 
 """
 from sdeep.models import DnCNN
-from .utils import get_arg_int, SDeepModulesFactory, SDeepModuleBuilder
+from sdeep.factories.utils import get_arg_int, SDeepModulesFactory, SDeepModuleBuilder
 
 
 class DnCNNBuilder(SDeepModuleBuilder):

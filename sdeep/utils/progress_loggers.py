@@ -199,6 +199,7 @@ class SFileLogger(SProgressLogger):
     def close(self):
         self.file.close()
 
+
 class SConsoleLogger(SProgressLogger):
     """Console logger displaying a progress bar
 
@@ -231,7 +232,7 @@ class SConsoleLogger(SProgressLogger):
         percent = ("{0:." + str(self.decimals) + "f}").format(
             100 * (iteration / float(total)))
         filled_length = int(self.length * iteration // total)
-        bar_ = self.fill * filled_length + '-' * (self.length - filled_length)
+        bar_ = self.fill * filled_length + ' ' * (self.length - filled_length)
         print(f'\r{prefix} {percent}% |{bar_}| {suffix}',
               end=self.print_end)
 
