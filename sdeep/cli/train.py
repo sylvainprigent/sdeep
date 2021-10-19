@@ -37,6 +37,7 @@ def main():
 
     parser.add_argument('--train_batch_size', help='Size of training batch', default='128')
     parser.add_argument('--val_batch_size', help='Size of validation batch', default='3')
+    parser.add_argument('--reuse', help='True to reuse a previous checking point', default='false')
 
     # parse modules parameters
     add_args_to_parser(parser, sdeepModels)
@@ -48,7 +49,10 @@ def main():
     args = parser.parse_args()
 
     # instantiate
-    out_dir = get_subdir(args.save)
+    if args.reuse:
+        out_dir = args.save
+    else:
+        out_dir = get_subdir(args.save)
     model = sdeepModels.get_instance(args.model, args)
     loss_fn = sdeepLosses.get_instance(args.loss, args)
     optim = sdeepOptimizers.get_instance(args.optim, model, args)
@@ -112,6 +116,7 @@ def main():
     # data logger
     data_logger = STensorboardLogger(out_dir)
     workflow.set_data_logger(data_logger)
+    workflow.out_dir = out_dir
 
     workflow.fit()
 
@@ -121,8 +126,10 @@ def main():
         'model_state_dict': model.state_dict()
     }, os.path.join(out_dir, "model.ckpt"))
 
-    #workflow.save_model(os.path.join(out_dir, "model.pt"))
-
     observable.message(f"Done")
     logger_file.close()
     logger_console.close()
+
+
+if __name__ == "__main__":
+    main()

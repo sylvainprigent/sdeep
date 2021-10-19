@@ -5,7 +5,7 @@ Classes
 SWorkflow
 
 """
-
+import os
 from timeit import default_timer as timer
 import torch
 
@@ -47,7 +47,10 @@ class SWorkflow:
         self.progress = SProgressObservable()
         self.progress.prefix = 'SWorkflow'
 
-        self.current_epoch = -1
+        self.out_dir = ''
+
+        self.current_epoch = 0
+        self.current_loss = -1
 
     def set_data_logger(self, logger: SDataLogger):
         """Set the data logger to the workflow
@@ -97,6 +100,11 @@ class SWorkflow:
         self.progress.message(f"Using {self.device} device")
         self.progress.message(f"Model number of parameters: {num_parameters:d}")
 
+        checkpoint_file = os.path.join(self.out_dir, 'checkpoint.ckpt')
+        if os.path.isfile(checkpoint_file):
+            self.progress.message(f"Initialize training from checkpoint")
+            self.load_checkpoint(checkpoint_file)
+
     def after_train(self):
         """Instructions runs after the train.
 
@@ -117,6 +125,7 @@ class SWorkflow:
         """
         self.logger.add_scalar('train_loss', data['train_loss'],
                                self.current_epoch)
+        self.save_checkpoint()
 
     def after_train_batch(self, data):
         """Instructions runs after one batch
@@ -132,8 +141,8 @@ class SWorkflow:
         full_time_str = seconds2str(int(data['full_time']))
         remains_str = seconds2str(int(data['remain_time']))
         suffix = str(data['id_batch']) + '/' + str(data['total_batch']) + \
-                 '   [' + full_time_str + '<' + remains_str + ', loss=' + \
-                 loss_str + ']     '
+            '   [' + full_time_str + '<' + remains_str + ', loss=' + \
+            loss_str + ']     '
         self.progress.progress(data['id_batch'],
                                data['total_batch'],
                                prefix=prefix,
@@ -179,6 +188,7 @@ class SWorkflow:
 
         if count_step > 0:
             step_loss /= count_step
+        self.current_loss = step_loss
         return {'train_loss': step_loss}
 
     def after_val_step(self, data):
@@ -226,7 +236,7 @@ class SWorkflow:
 
         """
         self.before_train()
-        for epoch in range(self.epochs):
+        for epoch in range(self.current_epoch, self.epochs, 1):
             self.current_epoch = epoch
             train_data = self.train_step()
             self.after_train_step(train_data)
@@ -242,6 +252,32 @@ class SWorkflow:
 
         """
         self.train()
+
+    def save_checkpoint(self):
+        if self.out_dir != '':
+            self.save_checkpoint_to_file(os.path.join(self.out_dir, 'checkpoint.ckpt'))
+
+    def save_checkpoint_to_file(self, path):
+        """Save a checkpoint at a given epoch to a file
+
+        This method purpose is to save a checkpoint at each epoch in case
+        the training crash and restart from the previous epoch
+
+        """
+        torch.save({
+                'epoch': self.current_epoch,
+                'model_state_dict': self.model.state_dict(),
+                'optimizer_state_dict': self.optimizer.state_dict(),
+                'loss': self.current_loss,
+            }, path)
+
+    def load_checkpoint(self, path):
+        """Initialize the training for a checkpoint"""
+        checkpoint = torch.load(path)
+        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.current_epoch = checkpoint['epoch']
+        self.current_loss = checkpoint['loss']
 
     def predict(self, x):
         """Predict a single input
