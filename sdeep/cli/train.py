@@ -49,7 +49,7 @@ def main():
     args = parser.parse_args()
 
     # instantiate
-    if args.reuse:
+    if args.reuse == "true":
         out_dir = args.save
     else:
         out_dir = get_subdir(args.save)
