@@ -78,6 +78,28 @@ def get_arg_str(args, key, default_value):
     return default_value
 
 
+def get_arg_bool(args, key, default_value):
+    """Get the value of a parameter from the args list
+
+    The default value of the parameter is returned if the
+    key is not in args
+
+    Parameters
+    ----------
+    args: dict
+        Dictionary of the input args
+    key: str
+        Name of the parameters
+    default_value: str
+        Default value of the parameter
+
+    """
+    value = get_arg_str(args, key, default_value)
+    if value == 'True':
+        return True
+    return False
+
+
 class SDeepAbstractFactory:
     """Define the common methods of all factories
 

@@ -1,6 +1,6 @@
 """DnCNN pytorch module
 
-Implementation of the DnCNN network in pytorch lightning
+Implementation of the DnCNN network in pytorch
 
 Classes
 -------
