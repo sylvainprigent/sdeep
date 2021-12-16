@@ -10,6 +10,7 @@ SDeepServiceProvider
 """
 from sdeep.models import DnCNN
 from sdeep.models import UNet
+from sdeep.models import DRUNet
 from sdeep.factories.utils import get_arg_int, get_arg_bool, SDeepModulesFactory, SDeepModuleBuilder
 
 
@@ -80,10 +81,40 @@ class UnetBuilder(SDeepModuleBuilder):
             self.parameters[2]['value'] = n_feature_first
             use_batch_norm = get_arg_bool(args, 'unet_use_batch_norm', True)
             self.parameters[3]['value'] = use_batch_norm
-            self._instance = UNet(n_channels_in=n_channels_in,
-                                  n_channels_out=n_channels_out,
-                                  n_feature_first=n_feature_first,
-                                  use_batch_norm=use_batch_norm)
+            self._instance = DRUNet(n_channels_in=n_channels_in,
+                                    n_channels_out=n_channels_out,
+                                    n_feature_first=n_feature_first,
+                                    use_batch_norm=use_batch_norm)
+        return self._instance
+
+    def get_parameters(self):
+        return self.parameters
+
+
+class DRUNetBuilder(SDeepModuleBuilder):
+    """Service builder for the DnCNN model"""
+    def __init__(self):
+        super().__init__()
+        self.parameters = [{'key': 'drunet_in_nc',
+                            'default': 1,
+                            'value': 1,
+                            'help': 'Number of input channels (or features)'},
+                           {'key': 'drunet_out_nc',
+                            'default': 1,
+                            'value': 1,
+                            'help': 'Number of output channels (or features)'},
+                           ]
+
+    def get_instance(self, args):
+        if not self._instance:
+            in_nc = get_arg_int(args, 'drunet_in_nc', 1)
+            self.parameters[0]['value'] = in_nc
+            out_nc = get_arg_int(args, 'drunet_out_nc', 1)
+            self.parameters[1]['value'] = out_nc
+            self._instance = DRUNet(in_nc=in_nc,
+                                    out_nc=out_nc,
+                                    nc=[64, 128, 256, 512],
+                                    nb=4)
         return self._instance
 
     def get_parameters(self):
@@ -93,3 +124,4 @@ class UnetBuilder(SDeepModuleBuilder):
 sdeepModels = SDeepModulesFactory()
 sdeepModels.register_builder('DnCNN', DnCNNBuilder())
 sdeepModels.register_builder('UNet', UnetBuilder())
+sdeepModels.register_builder('DRUNet', DRUNetBuilder())

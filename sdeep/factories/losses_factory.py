@@ -28,5 +28,17 @@ class MSELossBuilder(SDeepModuleBuilder):
         return {}
 
 
+class MAELossBuilder(SDeepModuleBuilder):
+    """Service builder for the MAE (mean absolute error) loss"""
+    def get_instance(self, args):
+        if not self._instance:
+            self._instance = torch.nn.L1Loss()
+        return self._instance
+
+    def get_parameters(self):
+        return {}
+
+
 sdeepLosses = SDeepModulesFactory()
 sdeepLosses.register_builder('MSELoss', MSELossBuilder())
+sdeepLosses.register_builder('MAELoss', MAELossBuilder())
