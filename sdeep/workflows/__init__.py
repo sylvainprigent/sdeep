@@ -4,5 +4,7 @@ Implementation of deep learning training and testing workflow
 
 """
 from .base import SWorkflow
+from .restoration import RestorationWorkflow
 
-__all__ = ['SWorkflow']
+__all__ = ['SWorkflow',
+           'RestorationWorkflow']

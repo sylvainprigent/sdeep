@@ -81,10 +81,10 @@ class UnetBuilder(SDeepModuleBuilder):
             self.parameters[2]['value'] = n_feature_first
             use_batch_norm = get_arg_bool(args, 'unet_use_batch_norm', True)
             self.parameters[3]['value'] = use_batch_norm
-            self._instance = DRUNet(n_channels_in=n_channels_in,
-                                    n_channels_out=n_channels_out,
-                                    n_feature_first=n_feature_first,
-                                    use_batch_norm=use_batch_norm)
+            self._instance = UNet(n_channels_in=n_channels_in,
+                                  n_channels_out=n_channels_out,
+                                  n_feature_first=n_feature_first,
+                                  use_batch_norm=use_batch_norm)
         return self._instance
 
     def get_parameters(self):

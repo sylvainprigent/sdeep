@@ -25,13 +25,15 @@ def get_subdir(main_dir):
 
 def main():
 
-    parser = argparse.ArgumentParser(description='SDeep train')
+    parser = argparse.ArgumentParser(description='SDeep train', conflict_handler='resolve')
 
     parser.add_argument('-m', '--model', help='neural network model', default='DnCNN')
     parser.add_argument('-l', '--loss', help='Loss function', default='MSELoss')
     parser.add_argument('-o', '--optim', help='Optimizer method', default='Adam')
-    parser.add_argument('-t', '--train_dataset', help='Training dataset', default='RestorationPatchDataset')
-    parser.add_argument('-v', '--val_dataset', help='Validation dataset', default='RestorationDataset')
+    parser.add_argument('-t', '--train_dataset', help='Training dataset',
+                        default='RestorationPatchDataset')
+    parser.add_argument('-v', '--val_dataset', help='Validation dataset',
+                        default='RestorationDataset')
     parser.add_argument('-w', '--workflow', help='Training workflow', default='SWorkflow')
     parser.add_argument('-s', '--save', help='Save directory', default='./run')
 

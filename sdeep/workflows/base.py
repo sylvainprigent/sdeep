@@ -219,7 +219,7 @@ class SWorkflow:
         self.model.eval()
         val_loss = 0
         with torch.no_grad():
-            for x, y in self.val_data_loader:
+            for x, y, _ in self.val_data_loader:
                 x, y = x.to(self.device), y.to(self.device)
                 pred = self.model(x)
                 val_loss += self.loss_fn(pred, y).item()
