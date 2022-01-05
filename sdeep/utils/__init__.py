@@ -7,10 +7,12 @@ training and testing
 
 from .data_loggers import SDataLogger, STensorboardLogger
 from .progress_loggers import SProgressObservable, SFileLogger, SConsoleLogger
+from .tile_predict import TilePredict
 
 __all__ = ['SDataLogger',
            'STensorboardLogger',
            'SProgressObservable',
            'SFileLogger',
-           'SConsoleLogger'
+           'SConsoleLogger',
+           'TilePredict'
            ]

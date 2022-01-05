@@ -118,6 +118,7 @@ class RestorationPatchDataset(Dataset):
             raise Exception("Source and target dirs are not the same length")
 
         self.nb_images = len(os.listdir(source_dir))
+        # TODO: Change the 250 by the image size
         self.n_patches = self.nb_images * ((250 - patch_size) // stride) * \
                                           ((250 - patch_size) // stride)
 
@@ -204,8 +205,15 @@ class RestorationPatchDataset2(Dataset):
         self.stride = stride
         self.use_data_augmentation = use_data_augmentation
 
+        #print('source dir=', source_dir)
+        #print('target dir=', target_dir)
+
         self.source_images = natsorted(os.listdir(source_dir))
         self.target_images = natsorted(os.listdir(target_dir))
+
+        #print('source len=', len(self.source_images))
+        #print('target len=', len(self.target_images))
+
         if len(self.source_images) != len(self.target_images):
             raise Exception("Source and target dirs are not the same length")
 
@@ -232,6 +240,9 @@ class RestorationPatchDataset2(Dataset):
 
         img_source_np = self.source_data[img_number]
         img_target_np = self.target_data[img_number]
+
+        #print('img_source_np shape=', img_source_np.shape)
+        #print('img_target_np shape=', img_target_np.shape)
 
         nb_patch_w = (img_source_np.shape[1] - self.patch_size) // self.stride
         idx = idx % nb_patch_per_img
@@ -260,6 +271,10 @@ class RestorationPatchDataset2(Dataset):
         target_patch = np.ascontiguousarray(target_patch)
 
         # to tensor
+
+        #print('source shape = ', source_patch.shape)
+        #print('target shape = ', target_patch.shape)
+
         return (torch.from_numpy(source_patch).view(1, *source_patch.shape)
                 .float(),
                 torch.from_numpy(target_patch).view(1, *target_patch.shape)
