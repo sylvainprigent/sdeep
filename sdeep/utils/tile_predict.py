@@ -1,5 +1,3 @@
-import math
-import numpy as np
 import torch
 import torch.nn.functional as F
 
@@ -9,7 +7,8 @@ class TilePredict:
 
     The data is partitioned in overlapping tiles and the model predict
     each tile independently. Then the final image is reconstructed by recombining
-    predicted tiles. The overlapping regions are discarded.
+    predicted tiles. In the 'crop' mode, overlapping regions are discarded and in the mean mode,
+    overlapping regions are averaged
 
     Parameters
     ----------
@@ -27,6 +26,22 @@ class TilePredict:
         self.stride = stride
 
     def _pad(self, image, mode):
+        """Add a padding to the original image
+
+        This padding allows to fit an entire set of tile in the image
+
+        Parameters
+        ----------
+        image: ndarray
+            Image to process. The size must be (batch, channel, width, height)
+        mode: str
+            tiling mode: 'crop' or 'mean'
+
+        Return
+        ------
+        tuple: The padded image and the padding values
+
+        """
         B, C, W, H = image.shape
 
         # calculate padding x
@@ -62,7 +77,20 @@ class TilePredict:
         return pad_image, (pad_x_left, pad_x_right, pad_y_top, pad_y_bottom)
 
     def run(self, image, mode='crop'):
+        """Exec the prediction with tiling
 
+        Parameters
+        ----------
+        image: ndarray
+            Image to process. The size must be (batch, channel, width, height)
+        mode: str
+            tiling mode: 'crop' or 'mean'
+
+        Return
+        ------
+        ndarray: The processed image
+
+        """
         pad_image, padding = self._pad(image, mode)
 
         if mode == 'crop':
@@ -80,15 +108,26 @@ class TilePredict:
                               padding[2]:output_pad.shape[3]-padding[3]]
 
     def run_crop(self, image):
+        """Exec the prediction with tiling using the crop mode
 
+        Parameters
+        ----------
+        image: ndarray
+            Image to process. The size must be (batch, channel, width, height)
+
+        Return
+        ------
+        ndarray: The processed image
+
+        """
         B, C, W, H = image.shape
 
         unfold = torch.nn.Unfold(self.kernel_size, dilation=1, padding=0, stride=self.stride)
         patches = unfold(image)
-        print("unfold=", patches.shape)
+        # print("unfold=", patches.shape)
         L = patches.shape[2]
         patches = patches.contiguous().view(B, C, self.kernel_size, self.kernel_size, L)
-        print("unfold reshape=", patches.shape)
+        # print("unfold reshape=", patches.shape)
 
         # perform the operations on each patch
         for i in range(L):
@@ -100,25 +139,37 @@ class TilePredict:
         end = self.kernel_size-half_overlap
         crop_size = end-start
         patches = patches[:, :, start:end, start:end, :]
-        print("cropped=", patches.shape)  # [B, C, nb_patches_all, kernel_size*kernel_size]
-        print("crop size=", crop_size)
+        # print("cropped=", patches.shape)  # [B, C, nb_patches_all, kernel_size*kernel_size]
+        # print("crop size=", crop_size)
 
         patches = patches.contiguous().view(B, C*crop_size*crop_size, L)
         output = F.fold(
             patches, output_size=(H-2*half_overlap, W-2*half_overlap), kernel_size=crop_size, stride=crop_size)
-        print(output.shape)  # [B, C, H, W]
+        # print(output.shape)  # [B, C, H, W]
         return output
 
     def run_mean(self, image):
+        """Exec the prediction with tiling using the mean mode
+
+        Parameters
+        ----------
+        image: ndarray
+            Image to process. The size must be (batch, channel, width, height)
+
+        Return
+        ------
+        ndarray: The processed image
+
+        """
         B, C, W, H = image.shape
-        print('padded image shape=', image.shape)
+        # print('padded image shape=', image.shape)
 
         unfold = torch.nn.Unfold(self.kernel_size, dilation=1, padding=0, stride=self.stride)
         patches = unfold(image)
-        print("unfold=", patches.shape)
+        # print("unfold=", patches.shape)
         L = patches.shape[2]
         patches = patches.contiguous().view(B, C, self.kernel_size, self.kernel_size, L)
-        print("unfold reshape=", patches.shape)
+        # print("unfold reshape=", patches.shape)
 
         # perform the operations on each patch
         for i in range(L):
