@@ -15,8 +15,11 @@ class TilePredict:
     ----------
     model: nn.Module
         Model used to predict the result
-    tile_shape: tuple
-        Shape of one tile
+    kernel_size: int
+        width of the square kernel
+    stride: int
+        Stride between two tiles
+
     """
     def __init__(self, model, kernel_size=256, stride=128):
         self.model = model
@@ -27,11 +30,17 @@ class TilePredict:
         B, C, W, H = image.shape
 
         # calculate padding x
-        if mode == 'mean':
-            n_patch_x = (W - self.stride) / (self.kernel_size - self.stride)
+        if self.kernel_size == self.stride:
+            den = self.kernel_size
         else:
-            n_patch_x = W / (self.kernel_size - self.stride)
-        margin_x = W - int(n_patch_x) * (self.kernel_size - self.stride)
+            den = self.kernel_size - self.stride
+
+        if mode == 'mean':
+            #n_patch_x = (W - self.stride) / den
+            n_patch_x = W / den
+        else:
+            n_patch_x = W / den
+        margin_x = W - int(n_patch_x) * den
         margin_x_left = int(margin_x / 2)
         margin_x_right = margin_x - margin_x_left
         pad_x_left = self.stride + (self.kernel_size - self.stride) - margin_x_left
@@ -39,17 +48,17 @@ class TilePredict:
 
         # calculate padding y
         if mode == 'mean':
-            n_patch_y = (H - self.stride) / (self.kernel_size - self.stride)
+            #n_patch_y = (H - self.stride) / den
+            n_patch_y = H / den
         else:
-            n_patch_y = H / (self.kernel_size - self.stride)
-        margin_y = H - int(n_patch_y) * (self.kernel_size - self.stride)
+            n_patch_y = H / den
+        margin_y = H - int(n_patch_y) * den
         margin_y_top = int(margin_y / 2)
         margin_y_bottom = margin_y - margin_y_top
         pad_y_top = self.stride + (self.kernel_size - self.stride) - margin_y_top
         pad_y_bottom = self.stride + (self.kernel_size - self.stride) - margin_y_bottom
 
-        padding = torch.nn.ZeroPad2d((pad_x_left, pad_x_right, pad_y_top, pad_y_bottom))
-        pad_image = padding(image)
+        pad_image = F.pad(image, (pad_x_left, pad_x_right, pad_y_top, pad_y_bottom), mode='reflect')
         return pad_image, (pad_x_left, pad_x_right, pad_y_top, pad_y_bottom)
 
     def run(self, image, mode='crop'):
@@ -60,7 +69,7 @@ class TilePredict:
             # predict
             output_pad = self.run_crop(pad_image)
             # remove pad
-            offset = int(self.stride/2)
+            offset = int((self.kernel_size - self.stride)/2)
             return output_pad[:, :, padding[0]-offset:output_pad.shape[2]-padding[1]+offset,
                               padding[2]-offset:output_pad.shape[3]-padding[3]+offset]
         elif mode == 'mean':
@@ -73,57 +82,50 @@ class TilePredict:
     def run_crop(self, image):
 
         B, C, W, H = image.shape
-        print('padded image shape=', image.shape)
-        patches = image.unfold(3, self.kernel_size, self.stride)
-        print(patches.shape)
-        patches = patches.unfold(2, self.kernel_size, self.stride)
-        print(patches.shape)  # [B, C, nb_patches_h, nb_patches_w, kernel_size, kernel_size]
+
+        unfold = torch.nn.Unfold(self.kernel_size, dilation=1, padding=0, stride=self.stride)
+        patches = unfold(image)
+        print("unfold=", patches.shape)
+        L = patches.shape[2]
+        patches = patches.contiguous().view(B, C, self.kernel_size, self.kernel_size, L)
+        print("unfold reshape=", patches.shape)
 
         # perform the operations on each patch
-        # ...
+        for i in range(L):
+            with torch.no_grad():
+                patches[:, :, :, :, i] = self.model(patches[:, :, :, :, i])
 
-        # reshape output to match F.fold input
-        patches = torch.transpose(patches, 4, 5)
-
-        # crop to remove the overlap
-        start = int(self.stride/2)
-        end = self.kernel_size-int(self.stride/2)
+        half_overlap = int((self.kernel_size-self.stride)/2)
+        start = half_overlap
+        end = self.kernel_size-half_overlap
         crop_size = end-start
-        patches = patches[:, :, :, :, start:end, start:end]
+        patches = patches[:, :, start:end, start:end, :]
         print("cropped=", patches.shape)  # [B, C, nb_patches_all, kernel_size*kernel_size]
         print("crop size=", crop_size)
 
-        patches = patches.contiguous().view(B, C, -1, crop_size * crop_size)
-        print(patches.shape)  # [B, C, nb_patches_all, kernel_size*kernel_size]
-        patches = patches.permute(0, 1, 3, 2)
-        print(patches.shape)  # [B, C, kernel_size*kernel_size, nb_patches_all]
-        patches = patches.contiguous().view(B, C * crop_size * crop_size, -1)
-        print(patches.shape)  # [B, C*prod(kernel_size), L] as expected by Fold
-
+        patches = patches.contiguous().view(B, C*crop_size*crop_size, L)
         output = F.fold(
-            patches, output_size=(H-self.stride, W-self.stride), kernel_size=crop_size, stride=crop_size)
+            patches, output_size=(H-2*half_overlap, W-2*half_overlap), kernel_size=crop_size, stride=crop_size)
         print(output.shape)  # [B, C, H, W]
         return output
 
     def run_mean(self, image):
         B, C, W, H = image.shape
         print('padded image shape=', image.shape)
-        patches = image.unfold(3, self.kernel_size, self.stride)
-        print(patches.shape)
-        patches = patches.unfold(2, self.kernel_size, self.stride)
-        print(patches.shape)  # [B, C, nb_patches_h, nb_patches_w, kernel_size, kernel_size]
+
+        unfold = torch.nn.Unfold(self.kernel_size, dilation=1, padding=0, stride=self.stride)
+        patches = unfold(image)
+        print("unfold=", patches.shape)
+        L = patches.shape[2]
+        patches = patches.contiguous().view(B, C, self.kernel_size, self.kernel_size, L)
+        print("unfold reshape=", patches.shape)
 
         # perform the operations on each patch
-        # ...
+        for i in range(L):
+            with torch.no_grad():
+                patches[:, :, :, :, i] = self.model(patches[:, :, :, :, i])
 
-        # reshape output to match F.fold input
-        patches = torch.transpose(patches, 4, 5)
-        patches = patches.contiguous().view(B, C, -1, self.kernel_size * self.kernel_size)
-        print(patches.shape)  # [B, C, nb_patches_all, kernel_size*kernel_size]
-        patches = patches.permute(0, 1, 3, 2)
-        print(patches.shape)  # [B, C, kernel_size*kernel_size, nb_patches_all]
-        patches = patches.contiguous().view(B, C * self.kernel_size * self.kernel_size, -1)
-        print(patches.shape)  # [B, C*prod(kernel_size), L] as expected by Fold
+        patches = patches.contiguous().view(B, C*self.kernel_size*self.kernel_size, L)
 
         output = F.fold(
             patches, output_size=(H, W), kernel_size=self.kernel_size, stride=self.stride)
@@ -133,58 +135,3 @@ class TilePredict:
         recovery_mask = F.fold(torch.ones_like(patches), output_size=(
             H, W), kernel_size=self.kernel_size, stride=self.stride)
         return output/recovery_mask
-
-
-    def predict(self, image):
-        """Run the prediction
-
-        Parameters
-        ----------
-        image: ndarray
-            Input image for prediction.
-
-        Returns
-        -------
-        The predicted output. Same shape as input image
-        """
-        # if no tiling
-        if self.tile_shape is None:
-            return self.model.predict(image)
-
-        # predict with tiling
-        #stride_x = int(3*self.tile_shape[0]/4)
-        #stride_y = int(3*self.tile_shape[1]/4)
-
-        #n_tiles_x = (image.shape[0] - self.tile_shape[0]) // stride_x
-        #n_tiles_y = (image.shape[1] - self.tile_shape[1]) // stride_y
-
-        tiles = image.reshape(image.shape[0] // self.tile_shape[0],
-                              self.tile_shape[0],
-                              image.shape[1] // self.tile_shape[1],
-                              self.tile_shape[1]
-                              )
-        tiles = tiles.swapaxes(1, 2)
-
-        print('tiles shape = ', tiles.shape)
-        tiles_out = np.zeros(tiles.shape)
-        for i in range(tiles.shape[0]):
-            for j in range(tiles.shape[1]):
-                tiles_out[i, j, :, :] = self.model.predict(tiles[i, j, :, :])
-
-        output_image = tiles_out.swapaxes(1, 2).reshape(image.shape[0], image.shape[1])
-
-
-        #output_image = np.zeros(image.shape)
-        # for i in range(n_tiles_x):
-        #    for j in range(n_tiles_y):
-        #        # get the tile
-        #        tile = image[i * stride_x:i * stride_x + self.tile_shape[0],
-        #                     j * stride_y:j * stride_y + self.tile_shape[1]]
-        #        # predict
-        #        # todo: manage to(device) and squeeze
-        #        p_tile = self.model.predict(tile)
-        #        # put the tile in output
-        #        # todo: manage stride
-        #        output_image[i * stride_x:i * stride_x + self.tile_shape[0],
-        #                     j * stride_y:j * stride_y + self.tile_shape[1]] = p_tile
-        return output_image
