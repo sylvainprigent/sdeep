@@ -118,9 +118,9 @@ class RestorationPatchDataset(Dataset):
             raise Exception("Source and target dirs are not the same length")
 
         self.nb_images = len(os.listdir(source_dir))
-        # TODO: Change the 250 by the image size
-        self.n_patches = self.nb_images * ((250 - patch_size) // stride) * \
-                                          ((250 - patch_size) // stride)
+        image = io.imread(os.path.join(self.source_dir, self.source_images[0]))
+        self.n_patches = self.nb_images * ((image.shape[0] - patch_size) // stride) * \
+                                          ((image.shape[1] - patch_size) // stride)
 
     def __len__(self):
         return self.n_patches
@@ -129,8 +129,7 @@ class RestorationPatchDataset(Dataset):
         # Crop a patch from original image
         nb_patch_per_img = self.n_patches // self.nb_images
 
-        img_number = idx // nb_patch_per_img
-        elt = 'img_' + str(img_number).zfill(4) + '.tif'
+        elt = self.source_images[idx // nb_patch_per_img]
 
         img_source_np = \
             np.float32(io.imread(os.path.join(self.source_dir, elt)))
@@ -218,8 +217,9 @@ class RestorationPatchDataset2(Dataset):
             raise Exception("Source and target dirs are not the same length")
 
         self.nb_images = len(os.listdir(source_dir))
-        self.n_patches = self.nb_images * ((250 - patch_size) // stride) * \
-                                          ((250 - patch_size) // stride)
+        image = io.imread(os.path.join(self.source_dir, self.source_images[0]))
+        self.n_patches = self.nb_images * ((image.shape[0] - patch_size) // stride) * \
+                                          ((image.shape[1] - patch_size) // stride)
 
         # Load all the images in a list
         self.source_data = []
