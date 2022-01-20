@@ -166,7 +166,8 @@ class RestorationPatchDataset(Dataset):
         return (torch.from_numpy(source_patch).view(1, *source_patch.shape)
                 .float(),
                 torch.from_numpy(target_patch).view(1, *target_patch.shape)
-                .float()
+                .float(),
+                str(idx)
                 )
 
 
@@ -278,4 +279,6 @@ class RestorationPatchDataset2(Dataset):
         return (torch.from_numpy(source_patch).view(1, *source_patch.shape)
                 .float(),
                 torch.from_numpy(target_patch).view(1, *target_patch.shape)
-                .float())
+                .float(),
+                str(idx)
+                )

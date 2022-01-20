@@ -156,7 +156,7 @@ class SWorkflow:
         full_time = 0
         count_step = 0
         tic = timer()
-        for batch, (x, y) in enumerate(self.train_data_loader):
+        for batch, (x, y, _) in enumerate(self.train_data_loader):
             count_step += 1
             x, y = x.to(self.device), y.to(self.device)
 

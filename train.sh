@@ -22,4 +22,5 @@ sdtrain --model DnCNN --loss MSELoss --optim Adam \
         --rd_path_target /home/sprigent/Documents/datasets/simulation/simulated/test/GT/ \
         --dncnn_layers 17 \
         --lr 0.001 \
-        --epochs 50
+        --epochs 50 \
+        --tiling True

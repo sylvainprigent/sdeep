@@ -14,7 +14,8 @@ sdeepWorkflows
 
 """
 from sdeep.workflows import SWorkflow, RestorationWorkflow
-from sdeep.factories.utils import get_arg_int, SDeepWorkflowsFactory, SDeepWorkflowBuilder
+from sdeep.factories.utils import (get_arg_int, get_arg_bool,
+                                   SDeepWorkflowsFactory, SDeepWorkflowBuilder)
 
 
 class SWorkflowBuilder(SDeepWorkflowBuilder):
@@ -53,7 +54,11 @@ class RestorationWorkflowBuilder(SDeepWorkflowBuilder):
         self.parameters = [{'key': 'epochs',
                             'default': 50,
                             'value': 50,
-                            'help': 'Number of epoch'}
+                            'help': 'Number of epoch'},
+                           {'key': 'tiling',
+                            'default': False,
+                            'value': False,
+                            'help': 'Use tiling for validation set'}
                            ]
 
     def get_instance(self, model, loss_fn, optimizer,
@@ -61,10 +66,13 @@ class RestorationWorkflowBuilder(SDeepWorkflowBuilder):
         if not self._instance:
             epochs = get_arg_int(args, 'epochs', 50)
             self.parameters[0]['value'] = epochs
+            tiling = get_arg_bool(args, 'tiling', False)
+            self.parameters[1]['value'] = tiling
             self._instance = RestorationWorkflow(model, loss_fn, optimizer,
                                                  train_data_loader,
                                                  test_data_loader,
-                                                 epochs=epochs)
+                                                 epochs=epochs,
+                                                 use_tiling=tiling)
         return self._instance
 
     def get_parameters(self):

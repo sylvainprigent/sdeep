@@ -14,6 +14,8 @@ def main():
     parser.add_argument('-i', '--input', help='Input image file', default='')
     parser.add_argument('-m', '--model', help='Model file', default='')
     parser.add_argument('-o', '--output', help='Output image file', default='')
+    parser.add_argument('-t', '--tiling', help='True to use tiling, False otherwise',
+                        default='False')
     args = parser.parse_args()
 
     # check inputs
@@ -40,11 +42,12 @@ def main():
     model.eval()
 
     # run the model
-    tile_predict = TilePredict(model)
-    pred = tile_predict.run(image_device)
-
-    #with torch.no_grad():
-    #    pred = model(image_device)
+    if args.tiling:
+        tile_predict = TilePredict(model)
+        pred = tile_predict.run(image_device)
+    else:
+        with torch.no_grad():
+            pred = model(image_device)
 
     # save the image
     pred_numpy = pred[0, 0, :, :].cpu().numpy()

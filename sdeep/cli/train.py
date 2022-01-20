@@ -61,6 +61,8 @@ def main():
     train_dataset = sdeepDatasets.get_instance(args.train_dataset, args)
     val_dataset = sdeepDatasets.get_instance(args.val_dataset, args)
 
+    val_dataset.use_data_augmentation = False
+
     train_data_loader = DataLoader(train_dataset,
                                    batch_size=int(args.train_batch_size),
                                    shuffle=True,

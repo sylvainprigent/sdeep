@@ -14,7 +14,7 @@ sdeepLosses
 """
 from sdeep.datasets import RestorationPatchDataset, RestorationDataset, RestorationPatchDataset2
 from sdeep.factories.utils import (SDeepDatasetsFactory, SDeepDatasetBuilder,
-                                   get_arg_str, get_arg_int)
+                                   get_arg_str, get_arg_int, get_arg_bool)
 
 
 class RestorationDatasetBuilder(SDeepDatasetBuilder):
@@ -29,7 +29,11 @@ class RestorationDatasetBuilder(SDeepDatasetBuilder):
                            {'key': 'rd_path_target',
                             'default': '',
                             'value': '',
-                            'help': 'Path of the taget files'}
+                            'help': 'Path of the target files'},
+                           {'key': 'rd_augmentation',
+                            'default': True,
+                            'value': True,
+                            'help': 'Use data augmentation'}
                            ]
 
     def get_instance(self, args):
@@ -38,9 +42,11 @@ class RestorationDatasetBuilder(SDeepDatasetBuilder):
             self.parameters[0]['value'] = train_source_dir
             train_target_dir = get_arg_str(args, 'rd_path_target', '')
             self.parameters[1]['value'] = train_target_dir
+            data_augmentation = get_arg_bool(args, 'rd_augmentation', True)
+            self.parameters[2]['value'] = data_augmentation
             self._instance = RestorationDataset(train_source_dir,
                                                 train_target_dir,
-                                                use_data_augmentation=True)
+                                                use_data_augmentation=data_augmentation)
         return self._instance
 
     def get_parameters(self):
@@ -69,7 +75,11 @@ class RestorationPatchDatasetBuilder(SDeepDatasetBuilder):
                            {'key': 'rpd_stride',
                             'default': 10,
                             'value': 10,
-                            'help': 'Stride between two patches'}
+                            'help': 'Stride between two patches'},
+                           {'key': 'rpd_augmentation',
+                            'default': True,
+                            'value': True,
+                            'help': 'Use data augmentation'}
                            ]
 
     def get_instance(self, args):
@@ -82,12 +92,14 @@ class RestorationPatchDatasetBuilder(SDeepDatasetBuilder):
             self.parameters[2]['value'] = patch_size
             stride = get_arg_int(args, 'rpd_stride', 10)
             self.parameters[3]['value'] = stride
+            data_augmentation = get_arg_bool(args, 'rpd_augmentation', True)
+            self.parameters[4]['value'] = data_augmentation
             self._instance = RestorationPatchDataset(
                                     train_source_dir,
                                     train_target_dir,
                                     patch_size=patch_size,
                                     stride=stride,
-                                    use_data_augmentation=True)
+                                    use_data_augmentation=data_augmentation)
         return self._instance
 
     def get_parameters(self):
@@ -116,7 +128,11 @@ class RestorationPatchDataset2Builder(SDeepDatasetBuilder):
                            {'key': 'rpd2_stride',
                             'default': 10,
                             'value': 10,
-                            'help': 'Stride between two patches'}
+                            'help': 'Stride between two patches'},
+                           {'key': 'rpd2_augmentation',
+                            'default': True,
+                            'value': True,
+                            'help': 'Use data augmentation'}
                            ]
 
     def get_instance(self, args):
@@ -129,12 +145,14 @@ class RestorationPatchDataset2Builder(SDeepDatasetBuilder):
             self.parameters[2]['value'] = patch_size
             stride = get_arg_int(args, 'rpd2_stride', 10)
             self.parameters[3]['value'] = stride
+            data_augmentation = get_arg_bool(args, 'rpd2_augmentation', True)
+            self.parameters[4]['value'] = data_augmentation
             self._instance = RestorationPatchDataset2(
                                     train_source_dir,
                                     train_target_dir,
                                     patch_size=patch_size,
                                     stride=stride,
-                                    use_data_augmentation=True)
+                                    use_data_augmentation=data_augmentation)
         return self._instance
 
     def get_parameters(self):
