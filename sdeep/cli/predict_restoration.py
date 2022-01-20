@@ -4,7 +4,7 @@ import torch
 import argparse
 from skimage.io import imread, imsave
 
-from sdeep.models import DnCNN
+from sdeep.utils import TilePredict
 from sdeep.factories import sdeepModels
 
 
@@ -25,6 +25,7 @@ def main():
         return
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    print('device = ', device)
 
     # read the image
     image = np.float32(imread(args.input))
@@ -32,14 +33,18 @@ def main():
     image_device = image_torch.to(device).unsqueeze(0).unsqueeze(0)
 
     # read the model
-    check_point = torch.load(args.model)
+    check_point = torch.load(args.model, map_location=torch.device(device))
     model = sdeepModels.get_instance(check_point['model'], check_point['model_args'])
     model.load_state_dict(check_point['model_state_dict'])
     model.to(device)
     model.eval()
 
-    with torch.no_grad():
-        pred = model(image_device)
+    # run the model
+    tile_predict = TilePredict(model)
+    pred = tile_predict.run(image_device)
+
+    #with torch.no_grad():
+    #    pred = model(image_device)
 
     # save the image
     pred_numpy = pred[0, 0, :, :].cpu().numpy()

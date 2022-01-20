@@ -38,6 +38,7 @@ class DRUNet(nn.Module):
     """
     def __init__(self, in_nc=1, out_nc=1, nc=[64, 128, 256, 512], nb=4):
         super().__init__()
+        self.receptive_field = 128
 
         self.m_head = nn.Conv2d(in_nc, nc[0], 3, stride=1, padding=1, bias=False)
 
@@ -91,7 +92,7 @@ class DRUNet(nn.Module):
 if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    m = DRUnet()
+    m = DRUNet()
     m.to(device)
 
     y = torch.randn(3, 1, 256, 256).to(device)

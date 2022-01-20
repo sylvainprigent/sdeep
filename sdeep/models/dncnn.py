@@ -28,6 +28,7 @@ class DnCNN(nn.Module):
     def __init__(self, num_of_layers=17, channels=1, features=64):
         super().__init__()
 
+        self.receptive_field = 2*num_of_layers
         kernel_size = 3
         padding = 1
         layers = [nn.Conv2d(in_channels=channels, out_channels=features,

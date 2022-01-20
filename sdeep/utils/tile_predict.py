@@ -15,17 +15,32 @@ class TilePredict:
     model: nn.Module
         Model used to predict the result
     kernel_size: int
-        width of the square kernel
+        width of the square kernel. None by default meaning that the kernel size is automatically
+        calculated using a heuristic
     stride: int
-        Stride between two tiles
+        Stride between two tiles. None by default, meaning that it is half the model receptive
+        field that is used
 
     """
-    def __init__(self, model, kernel_size=256, stride=128):
+    def __init__(self, model, kernel_size=None, stride=None):
         self.model = model
         self.kernel_size = kernel_size
         self.stride = stride
+        if kernel_size is None or stride is None:
+            self._estimate_kernel_stride()
 
-    def _pad(self, image, mode):
+        print('kernel_size=', self.kernel_size)
+        print('stride=', self.stride)
+
+    def _estimate_kernel_stride(self):
+
+        if self.model.receptive_field <= 256:
+            self.kernel_size = int(256/self.model.receptive_field)*self.model.receptive_field
+        else:
+            self.kernel_size = self.model.receptive_field
+        self.stride = int(self.model.receptive_field/2)
+
+    def _pad(self, image):
         """Add a padding to the original image
 
         This padding allows to fit an entire set of tile in the image
@@ -34,8 +49,6 @@ class TilePredict:
         ----------
         image: ndarray
             Image to process. The size must be (batch, channel, width, height)
-        mode: str
-            tiling mode: 'crop' or 'mean'
 
         Return
         ------
@@ -50,11 +63,7 @@ class TilePredict:
         else:
             den = self.kernel_size - self.stride
 
-        if mode == 'mean':
-            #n_patch_x = (W - self.stride) / den
-            n_patch_x = W / den
-        else:
-            n_patch_x = W / den
+        n_patch_x = W / den
         margin_x = W - int(n_patch_x) * den
         margin_x_left = int(margin_x / 2)
         margin_x_right = margin_x - margin_x_left
@@ -62,11 +71,7 @@ class TilePredict:
         pad_x_right = self.stride + (self.kernel_size - self.stride) - margin_x_right
 
         # calculate padding y
-        if mode == 'mean':
-            #n_patch_y = (H - self.stride) / den
-            n_patch_y = H / den
-        else:
-            n_patch_y = H / den
+        n_patch_y = H / den
         margin_y = H - int(n_patch_y) * den
         margin_y_top = int(margin_y / 2)
         margin_y_bottom = margin_y - margin_y_top
@@ -76,38 +81,30 @@ class TilePredict:
         pad_image = F.pad(image, (pad_x_left, pad_x_right, pad_y_top, pad_y_bottom), mode='reflect')
         return pad_image, (pad_x_left, pad_x_right, pad_y_top, pad_y_bottom)
 
-    def run(self, image, mode='crop'):
+    def run(self, image):
         """Exec the prediction with tiling
 
         Parameters
         ----------
         image: ndarray
             Image to process. The size must be (batch, channel, width, height)
-        mode: str
-            tiling mode: 'crop' or 'mean'
 
         Return
         ------
         ndarray: The processed image
 
         """
-        pad_image, padding = self._pad(image, mode)
+        pad_image, padding = self._pad(image)
 
-        if mode == 'crop':
-            # predict
-            output_pad = self.run_crop(pad_image)
-            # remove pad
-            offset = int((self.kernel_size - self.stride)/2)
-            return output_pad[:, :, padding[0]-offset:output_pad.shape[2]-padding[1]+offset,
-                              padding[2]-offset:output_pad.shape[3]-padding[3]+offset]
-        elif mode == 'mean':
-            # predict
-            output_pad = self.run_mean(pad_image)
-            # remove pad
-            return output_pad[:, :, padding[0]:output_pad.shape[2]-padding[1],
-                              padding[2]:output_pad.shape[3]-padding[3]]
+        # predict
+        output_pad = self._run_crop(pad_image)
 
-    def run_crop(self, image):
+        # remove pad
+        offset = int((self.kernel_size - self.stride)/2)
+        return output_pad[:, :, padding[0]-offset:output_pad.shape[2]-padding[1]+offset,
+                          padding[2]-offset:output_pad.shape[3]-padding[3]+offset]
+
+    def _run_crop(self, image):
         """Exec the prediction with tiling using the crop mode
 
         Parameters
@@ -124,10 +121,8 @@ class TilePredict:
 
         unfold = torch.nn.Unfold(self.kernel_size, dilation=1, padding=0, stride=self.stride)
         patches = unfold(image)
-        # print("unfold=", patches.shape)
         L = patches.shape[2]
         patches = patches.contiguous().view(B, C, self.kernel_size, self.kernel_size, L)
-        # print("unfold reshape=", patches.shape)
 
         # perform the operations on each patch
         for i in range(L):
@@ -139,50 +134,9 @@ class TilePredict:
         end = self.kernel_size-half_overlap
         crop_size = end-start
         patches = patches[:, :, start:end, start:end, :]
-        # print("cropped=", patches.shape)  # [B, C, nb_patches_all, kernel_size*kernel_size]
-        # print("crop size=", crop_size)
 
         patches = patches.contiguous().view(B, C*crop_size*crop_size, L)
         output = F.fold(
             patches, output_size=(H-2*half_overlap, W-2*half_overlap), kernel_size=crop_size, stride=crop_size)
         # print(output.shape)  # [B, C, H, W]
         return output
-
-    def run_mean(self, image):
-        """Exec the prediction with tiling using the mean mode
-
-        Parameters
-        ----------
-        image: ndarray
-            Image to process. The size must be (batch, channel, width, height)
-
-        Return
-        ------
-        ndarray: The processed image
-
-        """
-        B, C, W, H = image.shape
-        # print('padded image shape=', image.shape)
-
-        unfold = torch.nn.Unfold(self.kernel_size, dilation=1, padding=0, stride=self.stride)
-        patches = unfold(image)
-        # print("unfold=", patches.shape)
-        L = patches.shape[2]
-        patches = patches.contiguous().view(B, C, self.kernel_size, self.kernel_size, L)
-        # print("unfold reshape=", patches.shape)
-
-        # perform the operations on each patch
-        for i in range(L):
-            with torch.no_grad():
-                patches[:, :, :, :, i] = self.model(patches[:, :, :, :, i])
-
-        patches = patches.contiguous().view(B, C*self.kernel_size*self.kernel_size, L)
-
-        output = F.fold(
-            patches, output_size=(H, W), kernel_size=self.kernel_size, stride=self.stride)
-        print(output.shape)  # [B, C, H, W]
-
-        # transform the sum of nn.Fold into mean using mask
-        recovery_mask = F.fold(torch.ones_like(patches), output_size=(
-            H, W), kernel_size=self.kernel_size, stride=self.stride)
-        return output/recovery_mask
