@@ -53,10 +53,10 @@ class RestorationWorkflow(SWorkflow):
         for x, y, names in self.val_data_loader:
             x = x.to(self.device)
             if self.use_tiling:
-                tile_predict = TilePredict(model)
+                tile_predict = TilePredict(self.model)
                 pred = tile_predict.run(x)
             else:
                 with torch.no_grad():
-                    pred = model(x)
+                    pred = self.model(x)
             for i in range(len(names)):
                 imsave(os.path.join(predictions_dir, names[i]), pred[i, :, :].cpu().numpy())
