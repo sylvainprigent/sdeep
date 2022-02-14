@@ -49,9 +49,9 @@ class SAContrarioMSELoss(nn.Module):
         # positive error map
         error_pos = inputs - targets
         inner_weights_pos = torch.Tensor(self.disk_mat).unsqueeze(0).unsqueeze(0).to(self.device)
-        inner_weights_pos.require_grad = True
+        inner_weights_pos.require_grad = False
         outer_weights_pos = torch.Tensor(self.ring_mat).unsqueeze(0).unsqueeze(0).to(self.device)
-        outer_weights_pos.require_grad = True
+        outer_weights_pos.require_grad = False
 
         inner_conv_pos = nn.Conv2d(1, 1, kernel_size=self.disk_mat.shape[0],
                                    stride=1,
@@ -67,39 +67,14 @@ class SAContrarioMSELoss(nn.Module):
 
         sigma_pos = torch.sqrt(torch.var(error_pos))
         stat_pos = self.coefficient * (
-                    inner_conv_pos(error_pos) - outer_conv_pos(error_pos)) / sigma_pos
-
+                    torch.abs(inner_conv_pos(error_pos) - outer_conv_pos(error_pos))) / sigma_pos
         stat_pos_norm = 0.5 * torch.erfc(stat_pos / self.sqrt2)
 
-        # negative error map
-        error_neg = targets - inputs
-        inner_weights_neg = torch.Tensor(self.disk_mat).unsqueeze(0).unsqueeze(0).to(self.device)
-        inner_weights_neg.require_grad = True
-        outer_weights_neg = torch.Tensor(self.ring_mat).unsqueeze(0).unsqueeze(0).to(self.device)
-        outer_weights_neg.require_grad = True
-
-        inner_conv_neg = nn.Conv2d(1, 1, kernel_size=self.disk_mat.shape[0],
-                                   stride=1,
-                                   padding=int((self.disk_mat.shape[0] - 1) / 2),
-                                   bias=False)
-        outer_conv_neg = nn.Conv2d(1, 1, kernel_size=self.ring_mat.shape[0],
-                                   stride=1,
-                                   padding=int((self.ring_mat.shape[0] - 1) / 2),
-                                   bias=False)
-        with torch.no_grad():
-            inner_conv_neg.weight = nn.Parameter(inner_weights_neg)
-            outer_conv_neg.weight = nn.Parameter(outer_weights_neg)
-
-        sigma_neg = torch.sqrt(torch.var(error_neg))
-        stat_neg = self.coefficient * (
-                    inner_conv_neg(error_neg) - outer_conv_neg(error_neg)) / sigma_neg
-
-        stat_neg_norm = 0.5 * torch.erfc(stat_neg / self.sqrt2)
 
         # map combination
-        th_map = (stat_pos_norm + stat_neg_norm)**2
-        th_map = th_map/torch.sum(th_map)
+        th_map = 1 - stat_pos_norm ** 2
+        #th_map = th_map/torch.sum(th_map)
 
         # MSE
-        wmse = torch.mean(th_map*(inputs - targets) ** 2)
+        wmse = torch.mean((1+th_map)*(inputs - targets) ** 2)
         return wmse
