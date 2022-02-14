@@ -15,6 +15,7 @@ sdeepLosses
 """
 import torch
 from sdeep.factories.utils import SDeepModulesFactory, SDeepModuleBuilder
+from sdeep.losses import SAContrarioMSELoss
 
 
 class MSELossBuilder(SDeepModuleBuilder):
@@ -39,6 +40,18 @@ class MAELossBuilder(SDeepModuleBuilder):
         return {}
 
 
+class SAContrarioMSELossBuilder(SDeepModuleBuilder):
+    """Service builder for the MAE (mean absolute error) loss"""
+    def get_instance(self, args):
+        if not self._instance:
+            self._instance = SAContrarioMSELoss()
+        return self._instance
+
+    def get_parameters(self):
+        return {}
+
+
 sdeepLosses = SDeepModulesFactory()
 sdeepLosses.register_builder('MSELoss', MSELossBuilder())
 sdeepLosses.register_builder('MAELoss', MAELossBuilder())
+sdeepLosses.register_builder('WACMSELoss', SAContrarioMSELossBuilder())
