@@ -67,14 +67,18 @@ class SAContrarioMSELoss(nn.Module):
 
         sigma_pos = torch.sqrt(torch.var(error_pos))
         stat_pos = self.coefficient * (
-                    torch.abs(inner_conv_pos(error_pos) - outer_conv_pos(error_pos))) / sigma_pos
+                    (inner_conv_pos(error_pos) - outer_conv_pos(error_pos))) / sigma_pos
         stat_pos_norm = 0.5 * torch.erfc(stat_pos / self.sqrt2)
 
+        stat_neg = self.coefficient * (
+                    -(inner_conv_pos(error_pos) - outer_conv_pos(error_pos))) / sigma_pos
+        stat_neg_norm = 0.5 * torch.erfc(stat_neg / self.sqrt2)
 
         # map combination
-        th_map = 1 - stat_pos_norm ** 2
-        #th_map = th_map/torch.sum(th_map)
+        # th_map = 1 - stat_pos_norm ** 2
+        th_map = stat_pos_norm ** 2 + stat_neg_norm ** 2
 
         # MSE
-        wmse = torch.mean((1+th_map)*(inputs - targets) ** 2)
+        # wmse = torch.mean((1+th_map)*(inputs - targets) ** 2)
+        wmse = torch.mean((inputs - targets) ** 2) + 0.5*torch.mean(th_map)
         return wmse

@@ -95,14 +95,30 @@ class DRUNetBuilder(SDeepModuleBuilder):
     """Service builder for the DnCNN model"""
     def __init__(self):
         super().__init__()
-        self.parameters = [{'key': 'drunet_in_nc',
-                            'default': 1,
-                            'value': 1,
-                            'help': 'Number of input channels (or features)'},
-                           {'key': 'drunet_out_nc',
-                            'default': 1,
-                            'value': 1,
-                            'help': 'Number of output channels (or features)'},
+        self.parameters = [{
+                                'key': 'drunet_in_nc',
+                                'default': 1,
+                                'value': 1,
+                                'help': 'Number of input channels (or features)'
+                           },
+                           {
+                                'key': 'drunet_out_nc',
+                                'default': 1,
+                                'value': 1,
+                                'help': 'Number of output channels (or features)'
+                           },
+                           {
+                               'key': 'drunet_nb',
+                               'default': 4,
+                               'value': 4,
+                               'help': 'Number of residual block per level'
+                           },
+                           {
+                                'key': 'drunet_nc',
+                                'default': 64,
+                                'value': 64,
+                                'help': 'Number of channels in the first layer'
+                           }
                            ]
 
     def get_instance(self, args):
@@ -111,10 +127,14 @@ class DRUNetBuilder(SDeepModuleBuilder):
             self.parameters[0]['value'] = in_nc
             out_nc = get_arg_int(args, 'drunet_out_nc', 1)
             self.parameters[1]['value'] = out_nc
+            nb = get_arg_int(args, 'drunet_nb', 4)
+            self.parameters[2]['value'] = nb
+            nc = get_arg_int(args, 'drunet_nc', 64)
+            self.parameters[3]['value'] = nc
             self._instance = DRUNet(in_nc=in_nc,
                                     out_nc=out_nc,
-                                    nc=[64, 128, 256, 512],
-                                    nb=4)
+                                    nc=[nc, 2*nc, 4*nc, 8*nc],
+                                    nb=nb)
         return self._instance
 
     def get_parameters(self):
