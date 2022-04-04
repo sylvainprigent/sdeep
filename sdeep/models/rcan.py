@@ -40,8 +40,8 @@ class RCAB(nn.Module):
         super(RCAB, self).__init__()
         modules_body = []
         for i in range(2):
-            modules_body.append(nn.conv2(n_feat, n_feat, kernel_size,
-                                         padding=(kernel_size//2), bias=bias))
+            modules_body.append(nn.Conv2d(n_feat, n_feat, kernel_size,
+                                          padding=(kernel_size//2), bias=bias))
             if bn:
                 modules_body.append(nn.BatchNorm2d(n_feat))
             if i == 0:
@@ -63,8 +63,9 @@ class ResidualGroup(nn.Module):
             RCAB(
                 n_feat, kernel_size, reduction, bias=True, bn=False, act=nn.ReLU(True),
                 res_scale=1) for _ in range(n_resblocks)]
-        modules_body.append(nn.conv2(n_feat, n_feat, kernel_size,
-                                     padding=(kernel_size//2), bias=True))
+        modules_body.append(nn.Conv2d(n_feat, n_feat, kernel_size, padding=(kernel_size // 2),
+                                      bias=True))
+
         self.body = nn.Sequential(*modules_body)
 
     def forward(self, x):
@@ -91,34 +92,29 @@ class RCAN(nn.Module):
     scale: int
         Scale factor between the input and output image. Ex: scale 2 makes the output image twice
         the size of the input image
-    res_scale: int
-        Residual scaling
+
     """
     def __init__(self, n_colors=1, n_resgroups=10, n_resblocks=20, n_feats=64,
-                 reduction=16, scale=1, res_scale=1):
+                 reduction=16, scale=1):
         super(RCAN, self).__init__()
 
         kernel_size = 3
         act = nn.ReLU(True)
-
         # define head module
         modules_head = [nn.Conv2d(n_colors, n_feats, kernel_size,
                                   padding=(kernel_size//2), bias=True)]
-
         # define body module
         modules_body = [
             ResidualGroup(
-                n_feats, kernel_size, reduction, act=act, res_scale=res_scale,
+                n_feats, kernel_size, reduction,
                 n_resblocks=n_resblocks) for _ in range(n_resgroups)]
 
         modules_body.append(nn.Conv2d(n_feats, n_feats, kernel_size,
                                       padding=(kernel_size//2), bias=True))
-
         # define tail module
         modules_tail = [
             UpSampler(scale, n_feats, act=False),
-            nn.conv2(n_feats, n_colors, kernel_size,
-                     padding=(kernel_size//2), bias=True)]
+            nn.Conv2d(n_feats, n_colors, kernel_size, padding=(kernel_size//2), bias=True)]
 
         self.head = nn.Sequential(*modules_head)
         self.body = nn.Sequential(*modules_body)
@@ -129,7 +125,6 @@ class RCAN(nn.Module):
         res = self.body(x)
         res += x
         x = self.tail(res)
-
         return x
 
 
