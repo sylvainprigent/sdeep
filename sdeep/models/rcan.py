@@ -98,6 +98,7 @@ class RCAN(nn.Module):
                  reduction=16, scale=1):
         super(RCAN, self).__init__()
 
+        self.receptive_field = 64
         kernel_size = 3
         act = nn.ReLU(True)
         # define head module
