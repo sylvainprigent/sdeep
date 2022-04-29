@@ -67,6 +67,8 @@ class VGGL1PerceptualLossBuilder(SDeepModuleBuilder):
             weight = get_arg_float(args, 'vggl1_weight', 1.0)
             self.parameters[0]['value'] = weight
             self._instance = VGGL1PerceptualLoss(weight=weight)
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            self._instance.to(device)
         return self._instance
 
     def get_parameters(self):
