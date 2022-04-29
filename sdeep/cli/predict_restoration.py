@@ -36,6 +36,7 @@ def main():
 
     # read the model
     check_point = torch.load(args.model, map_location=torch.device(device))
+    print('model args = ', check_point['model_args'])
     model = sdeepModels.get_instance(check_point['model'], check_point['model_args'])
     model.load_state_dict(check_point['model_state_dict'])
     model.to(device)
