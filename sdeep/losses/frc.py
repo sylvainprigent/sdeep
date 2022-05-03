@@ -15,11 +15,11 @@ class FRCLoss(torch.nn.Module):
     def __init__(self, patch_size):
         super().__init__()
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.weights = torch.from_numpy(np.arange(0, 1, 1/patch_size))
-        self.linear = torch.nn.Linear(len(self.weights), 1)
-        with torch.no_grad():
-            self.linear.weight = torch.nn.Parameter(
-                torch.Tensor(self.weights).unsqueeze(0).unsqueeze(0).to(self.device))
+        weight = np.float32(np.arange(0, 1, 1/(patch_size-1)))
+        self.weights = torch.from_numpy(weight/np.sum(weight)).to(self.device)
+        self.linear = torch.nn.Linear(len(self.weights), 1, bias=False, device=self.device)
+        self.linear.requires_grad_(False)
+        self.linear.weight.data = self.weights
 
     def forward(self, input, target):
         # calculate fourier transform
@@ -29,7 +29,7 @@ class FRCLoss(torch.nn.Module):
         # calculate the correlation for each ring
         s_x = input.shape[2]
         s_y = input.shape[3]
-        r_max = len(self.weights)  # min(int(s_x / 2), int(s_y / 2))
+        r_max = len(self.weights)+1  # min(int(s_x / 2), int(s_y / 2))
         curve_ = torch.zeros((input.shape[0], input.shape[1], r_max - 1)).to(self.device)
         curve_[:, :, 0] = 1
         for radius in range(1, r_max - 1):
@@ -40,7 +40,7 @@ class FRCLoss(torch.nn.Module):
             num = torch.abs(torch.sum(p_1 * torch.conj(p_2)))
             den = torch.sum(torch.square(torch.abs(p_1))) * torch.sum(torch.square(torch.abs(p_2)))
 
-            curve_[radius] = num / torch.sqrt(den)
+            curve_[:, :, radius] = num / torch.sqrt(den)
 
         # loss is linear combination of ring correlation
         return torch.sum(self.linear(curve_))
