@@ -116,11 +116,18 @@ class FRMSELossBuilder(SDeepModuleBuilder):
     """Service builder for the FRMSELoss loss"""
     def __init__(self):
         super().__init__()
-        self.parameters = []
+        self.parameters = [{'key': 'frm_len',
+                            'default': 20.0,
+                            'value': 20.0,
+                            'help': 'Diameter of the largest FR MSE max ring'
+                            }
+                           ]
 
     def get_instance(self, args):
         if not self._instance:
-            self._instance = FRMSELoss()
+            patch_size = get_arg_float(args, 'frm_len', 40.0)
+            self.parameters[0]['value'] = patch_size
+            self._instance = FRMSELoss(patch_size=patch_size)
             return self._instance
 
     def get_parameters(self):
