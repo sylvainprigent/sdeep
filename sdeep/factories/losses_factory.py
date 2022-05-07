@@ -15,7 +15,7 @@ sdeepLosses
 """
 import torch
 from sdeep.factories.utils import get_arg_float, SDeepModulesFactory, SDeepModuleBuilder
-from sdeep.losses import SAContrarioMSELoss, VGGL1PerceptualLoss, FRCLoss, FMSELoss
+from sdeep.losses import SAContrarioMSELoss, VGGL1PerceptualLoss, FRCLoss, FMSELoss, FRMSELoss
 
 
 class MSELossBuilder(SDeepModuleBuilder):
@@ -112,6 +112,21 @@ class FMSELossBuilder(SDeepModuleBuilder):
         return self.parameters
 
 
+class FRMSELossBuilder(SDeepModuleBuilder):
+    """Service builder for the FRMSELoss loss"""
+    def __init__(self):
+        super().__init__()
+        self.parameters = []
+
+    def get_instance(self, args):
+        if not self._instance:
+            self._instance = FRMSELoss()
+            return self._instance
+
+    def get_parameters(self):
+        return self.parameters
+
+
 sdeepLosses = SDeepModulesFactory()
 sdeepLosses.register_builder('MSELoss', MSELossBuilder())
 sdeepLosses.register_builder('MAELoss', MAELossBuilder())
@@ -119,3 +134,4 @@ sdeepLosses.register_builder('WACMSELoss', SAContrarioMSELossBuilder())
 sdeepLosses.register_builder('VGGL1', VGGL1PerceptualLossBuilder())
 sdeepLosses.register_builder('FRCLoss', FRCLossBuilder())
 sdeepLosses.register_builder('FMSELoss', FMSELossBuilder())
+sdeepLosses.register_builder('FRMSELoss', FRMSELossBuilder())
