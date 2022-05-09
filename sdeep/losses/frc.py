@@ -44,3 +44,21 @@ class FRCLoss(torch.nn.Module):
 
         # loss is linear combination of ring correlation
         return torch.sum(self.linear(curve_))
+
+
+class MSEFRCLoss(torch.nn.Module):
+    """Define an image reconstruction loss with the Fourier Ring Correlation + MSE
+
+    Parameters
+    ----------
+    patch_size: int
+        size of the input image patch in it smallest dimension
+
+    """
+    def __init__(self, patch_size):
+        super().__init__()
+        self.frc = FRCLoss(patch_size)
+        self.mse = torch.nn.MSELoss()
+
+    def forward(self, input, target):
+        return self.mse(input, target) + self.frc(input, target)
