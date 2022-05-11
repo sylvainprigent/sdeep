@@ -53,20 +53,13 @@ class DoGLoss(torch.nn.Module):
         # DoG filter
         sigma_pairs = [(0.2, 0.202), (0.2, 0.5), (0.2, 0.7), (0.2, 1.0), (0.2, 1.2), (0.2, 1.4)]
         weights = dog_kernels(sigma_pairs, 7)
-        print(weights)
         self.dog_filter = torch.nn.Conv2d(1, len(sigma_pairs), 7, padding=3, bias=False,
                                           padding_mode='reflect', device=self.device)
         self.dog_filter.requires_grad_(False)
-        self.dog_filter.weight.data = torch.Tensor(weights).view((len(sigma_pairs), 1, 7, 7))
-
-        # linear filter
-        linear_weight = torch.from_numpy(np.ones((len(sigma_pairs)))).to(self.device)
-        self.linear = torch.nn.Linear(len(sigma_pairs), 1, bias=False, device=self.device)
-        self.linear.requires_grad_(False)
-        self.linear.weight.data = linear_weight
+        self.dog_filter.weight.data = torch.Tensor(weights).view((len(sigma_pairs), 1, 7, 7)).to(self.device)
 
     def forward(self, input, target):
         dog_input = self.dog_filter(input)
         dog_output = self.dog_filter(target)
-        dog_loss = self.linear(torch.sum(torch.square(dog_input-dog_output)))
-        return self.mse(input, target) + dog_loss
+        mse_dogs = ((dog_input - dog_output)**2).mean()
+        return self.mse(input, target) + mse_dogs
