@@ -247,6 +247,9 @@ class DRUNetUpBuilder(SDeepModuleBuilder):
                                       nb=nb)
         return self._instance
 
+    def get_parameters(self):
+        return self.parameters
+
 
 sdeepModels = SDeepModulesFactory()
 sdeepModels.register_builder('DnCNN', DnCNNBuilder())
