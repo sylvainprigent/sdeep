@@ -7,7 +7,9 @@ SWorkflow
 """
 import os
 from timeit import default_timer as timer
+
 import torch
+from torch.utils.data import DataLoader
 
 from sdeep.utils import SProgressObservable, SDataLogger
 from sdeep.utils.utils import seconds2str
@@ -16,31 +18,41 @@ from sdeep.utils.utils import seconds2str
 class SWorkflow:
     """Default workflow to train and predict a neural network
 
-    Parameters
-    ----------
-    model: nn.Module
-        Neural network model
-    loss_fn: nn.Module
-        Training loss function
-    optimizer: nn.Module
-        Optimizer
-    train_data_loader: DataLoader
-        Data loader to iterate a training dataset
-    val_data_loader : DataLoader
-        Data loader to iterate a testing dataset
-
+    :param model: Neural network model
+    :param loss_fn: Training loss function
+    :param optimizer: Back propagation optimizer
+    :param train_dataset: Training dataset
+    :param val_dataset: Validation dataset
+    :param train_batch_size: Size of a training batch
+    :param val_batch_size: Size of a validation batch
+    :param epochs: Number of epoch for training
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, model, loss_fn, optimizer, train_data_loader,
-                 val_data_loader, epochs=50):
+    def __init__(self,
+                 model: torch.nn.Module,
+                 loss_fn: torch.nn.Module,
+                 optimizer: torch.nn.Module,
+                 train_dataset: torch.utils.data.Dataset,
+                 val_dataset: torch.utils.data.Dataset,
+                 train_batch_size: int,
+                 val_batch_size: int,
+                 epochs: int = 50):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.model = model.to(self.device)
         self.loss_fn = loss_fn
         self.optimizer = optimizer
-        self.train_data_loader = train_data_loader
-        self.val_data_loader = val_data_loader
+        self.train_data_loader = DataLoader(train_dataset,
+                                            batch_size=train_batch_size,
+                                            shuffle=True,
+                                            drop_last=True,
+                                            num_workers=0)
+        self.val_data_loader = DataLoader(val_dataset,
+                                          batch_size=val_batch_size,
+                                          shuffle=False,
+                                          drop_last=False,
+                                          num_workers=0)
         self.epochs = epochs
 
         self.logger = None
@@ -64,7 +76,7 @@ class SWorkflow:
         self.logger = logger
 
     def set_progress_observable(self, observable):
-        """The the progress logger observable
+        """The progress logger observable
 
         Parameters
         ----------
@@ -92,17 +104,19 @@ class SWorkflow:
 
         This method can be used to log data or print console messages
         """
-        num_parameters = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        num_parameters = sum(p.numel() for p in
+                             self.model.parameters() if p.requires_grad)
 
         dummy_input = torch.rand(1, 1, 40, 40).to(self.device)
         self.logger.add_graph(self.model, dummy_input)
         self.logger.flush()
         self.progress.message(f"Using {self.device} device")
-        self.progress.message(f"Model number of parameters: {num_parameters:d}")
+        self.progress.message(f"Model number of parameters: "
+                              f"{num_parameters:d}")
 
         checkpoint_file = os.path.join(self.out_dir, 'checkpoint.ckpt')
         if os.path.isfile(checkpoint_file):
-            self.progress.message(f"Initialize training from checkpoint")
+            self.progress.message("Initialize training from checkpoint")
             self.load_checkpoint(checkpoint_file)
 
     def after_train(self):
@@ -202,7 +216,7 @@ class SWorkflow:
             Dictionary of metadata to log or process
         """
         # just loss by default but add a code here to save the crop results on
-        # tensor board or any output output folder ?
+        # tensor board or any output folder ?
         self.logger.add_scalar('val_loss', data['val_loss'],
                                self.current_epoch)
 
@@ -254,8 +268,10 @@ class SWorkflow:
         self.train()
 
     def save_checkpoint(self):
+        """Save the model weights as a checkpoint"""
         if self.out_dir != '':
-            self.save_checkpoint_to_file(os.path.join(self.out_dir, 'checkpoint.ckpt'))
+            self.save_checkpoint_to_file(os.path.join(self.out_dir,
+                                                      'checkpoint.ckpt'))
 
     def save_checkpoint_to_file(self, path):
         """Save a checkpoint at a given epoch to a file
@@ -314,7 +330,6 @@ class SWorkflow:
             Path to the destination file
         """
         torch.save(self.model.state_dict(), filename)
-        #torch.save(self.model, filename)
 
     def load(self, filename):
         """Load a model from file
@@ -325,4 +340,6 @@ class SWorkflow:
             Path of the file containing the model
         """
         self.model.load_state_dict(torch.load(filename))
-        # self.model = torch.load(filename)
+
+
+export = [SWorkflow]

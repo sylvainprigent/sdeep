@@ -1,17 +1,11 @@
-"""Misc functions used by loggers
+"""Misc functions used by loggers"""
 
 
-"""
-
-
-def seconds2str(sec):
+def seconds2str(sec: int) -> str:
     """Convert seconds to printable string in hh:mm:ss
 
-    Parameters
-    ----------
-    sec: int
-        Duration in seconds
-
+    :param sec: Duration in seconds
+    :return: human-readable time string
     """
     sec_value = sec % (24 * 3600)
     hour_value = sec_value // 3600

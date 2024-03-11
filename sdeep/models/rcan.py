@@ -1,22 +1,16 @@
-"""UNet pytorch module
-
-Implementation of the UNet network in pytorch
-
-Classes
--------
-CALayer
-RCAB
-ResidualGroup
-RCAN
-
-"""
-
-from torch import nn
+"""Implementation of the RCAN network in pytorch"""
 import math
+import torch
+from torch import nn
 
 
 class CALayer(nn.Module):
-    def __init__(self, channel, reduction=16):
+    """ON layer of CA architecture
+
+    :param channel: number of input channels
+    :param reduction: reduction factor to decrease the number of channels
+    """
+    def __init__(self, channel: int, reduction: int = 16):
         super(CALayer, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.conv_du = nn.Sequential(
@@ -26,7 +20,11 @@ class CALayer(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
+        """torch forward method
+
+        :param x: tensor to process
+        """
         y = self.avg_pool(x)
         y = self.conv_du(y)
         return x * y
@@ -61,9 +59,11 @@ class ResidualGroup(nn.Module):
         super(ResidualGroup, self).__init__()
         modules_body = [
             RCAB(
-                n_feat, kernel_size, reduction, bias=True, bn=False, act=nn.ReLU(True),
+                n_feat, kernel_size, reduction, bias=True, bn=False,
+                act=nn.ReLU(True),
                 res_scale=1) for _ in range(n_resblocks)]
-        modules_body.append(nn.Conv2d(n_feat, n_feat, kernel_size, padding=(kernel_size // 2),
+        modules_body.append(nn.Conv2d(n_feat, n_feat, kernel_size,
+                                      padding=(kernel_size // 2),
                                       bias=True))
 
         self.body = nn.Sequential(*modules_body)
@@ -152,3 +152,6 @@ class UpSampler(nn.Sequential):
             raise NotImplementedError
 
         super(UpSampler, self).__init__(*m)
+
+
+export = [RCAN]

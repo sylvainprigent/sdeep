@@ -1,3 +1,4 @@
+"""Module to implement training losses"""
 from .error_maps import SAContrarioMSELoss
 from .perceptual import VGGL1PerceptualLoss
 from .fmse import FMSELoss

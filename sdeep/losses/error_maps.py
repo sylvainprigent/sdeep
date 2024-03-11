@@ -82,3 +82,6 @@ class SAContrarioMSELoss(nn.Module):
         # wmse = torch.mean((1+th_map)*(inputs - targets) ** 2)
         wmse = torch.mean((inputs - targets) ** 2) + 0.5*torch.mean(th_map)
         return wmse
+
+
+export = [SAContrarioMSELoss]

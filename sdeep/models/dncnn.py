@@ -1,31 +1,19 @@
-"""DnCNN pytorch module
-
-Implementation of the DnCNN network in pytorch
-
-Classes
--------
-DnCNN
-
-"""
-
+"""Implementation of the DnCNN network in pytorch"""
+from torch import Tensor
 from torch import nn
 
 
 class DnCNN(nn.Module):
     """Implementation of the DnCNN network
 
-    Parameters
-    ----------
-    num_of_layers: int
-        Number of layers in the model
-    channels: int
-        Number of channels in the images
-    features: int
-        Number of features in hidden layers
-
+    :param num_of_layers: Number of layers in the model
+    :param channels: Number of channels in the images
+    :param features: Number of features in hidden layers
     """
-
-    def __init__(self, num_of_layers=17, channels=1, features=64):
+    def __init__(self,
+                 num_of_layers: int = 17,
+                 channels: int = 1,
+                 features: int = 64):
         super().__init__()
 
         self.receptive_field = 2*num_of_layers
@@ -47,19 +35,16 @@ class DnCNN(nn.Module):
                                 bias=False))
         self.dncnn = nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x: Tensor):
         """Network forward method
 
-        Parameters
-        ----------
-        x: Tensor
-            Network input batch
-
-        Returns
-        -------
-        Tensor containing the network output
+        :param x: Network input batch
+        :return: Tensor containing the network output
 
         """
         y = x
         residue = self.dncnn(x)
         return y - residue
+
+
+export = [DnCNN]

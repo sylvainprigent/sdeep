@@ -22,3 +22,6 @@ class FMSELoss(torch.nn.Module):
         input_fft = torch.fft.fft2(input)
         target_fft = torch.fft.fft2(target)
         return torch.sum(torch.square(torch.abs(input_fft-target_fft)))
+
+
+export = [FMSELoss]

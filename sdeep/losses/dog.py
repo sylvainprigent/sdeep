@@ -63,3 +63,6 @@ class DoGLoss(torch.nn.Module):
         dog_output = self.dog_filter(target)
         mse_dogs = ((dog_input - dog_output)**2).mean()
         return self.mse(input, target) + mse_dogs
+
+
+export = [DoGLoss]

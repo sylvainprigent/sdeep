@@ -3,15 +3,37 @@ import os
 from skimage.io import imsave
 import torch
 
-from .base import SWorkflow
 from sdeep.utils import TilePredict
+from .base import SWorkflow
 
 
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-arguments
 class RestorationWorkflow(SWorkflow):
-    def __init__(self, model, loss_fn, optimizer, train_data_loader,
-                 val_data_loader, epochs=50, use_tiling=False):
-        super().__init__(model, loss_fn, optimizer, train_data_loader,
-                         val_data_loader, epochs)
+    """Workflow to train and predict a restoration neural network
+
+    :param model: Neural network model
+    :param loss_fn: Training loss function
+    :param optimizer: Back propagation optimizer
+    :param train_dataset: Training dataset
+    :param val_dataset: Validation dataset
+    :param train_batch_size: Size of a training batch
+    :param val_batch_size: Size of a validation batch
+    :param epochs: Number of epoch for training
+    :param use_tiling: use tiling or not for prediction
+    """
+    def __init__(self,
+                 model,
+                 loss_fn,
+                 optimizer,
+                 train_dataset,
+                 val_dataset,
+                 train_batch_size,
+                 val_batch_size,
+                 epochs=50,
+                 use_tiling=False):
+        super().__init__(model, loss_fn, optimizer, train_dataset,
+                         val_dataset, train_batch_size, val_batch_size, epochs)
         self.use_tiling = use_tiling
 
     def val_step(self):
@@ -50,7 +72,7 @@ class RestorationWorkflow(SWorkflow):
 
         # predict on all the test set
         self.model.eval()
-        for x, y, names in self.val_data_loader:
+        for x, _, names in self.val_data_loader:
             x = x.to(self.device)
             if self.use_tiling:
                 tile_predict = TilePredict(self.model)
@@ -58,5 +80,9 @@ class RestorationWorkflow(SWorkflow):
             else:
                 with torch.no_grad():
                     pred = self.model(x)
-            for i in range(len(names)):
-                imsave(os.path.join(predictions_dir, names[i]), pred[i, :, :].cpu().numpy())
+            for i, name in enumerate(names):
+                imsave(os.path.join(predictions_dir, name),
+                       pred[i, :, :].cpu().numpy())
+
+
+export = [RestorationWorkflow]
