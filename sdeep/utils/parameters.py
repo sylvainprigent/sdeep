@@ -41,6 +41,16 @@ class SParameters:
         """
         self.__params = data
 
+    def is_module(self, name) -> False:
+        """Check if a module exists in the parameters
+
+        :param name: Name of the module
+        :return: True if the module exists, False otherwise
+        """
+        if name in self.__params:
+            return True
+        return False
+
     def module(self, name: str) -> Tuple[str, Dict]:
         """Get a module parameters using it name
 

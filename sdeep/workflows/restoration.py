@@ -1,9 +1,14 @@
 """Restoration deep learning workflow"""
-import os
+from pathlib import Path
 from skimage.io import imsave
+
 import torch
+from torch.utils.data import Dataset
 
 from sdeep.utils import TilePredict
+from sdeep.utils import device
+from sdeep.evals import Eval
+
 from .base import SWorkflow
 
 
@@ -20,20 +25,25 @@ class RestorationWorkflow(SWorkflow):
     :param train_batch_size: Size of a training batch
     :param val_batch_size: Size of a validation batch
     :param epochs: Number of epoch for training
+    :param num_workers: Number of workers for data loading
     :param use_tiling: use tiling or not for prediction
     """
     def __init__(self,
-                 model,
-                 loss_fn,
-                 optimizer,
-                 train_dataset,
-                 val_dataset,
-                 train_batch_size,
-                 val_batch_size,
-                 epochs=50,
+                 model: torch.nn.Module,
+                 loss_fn: torch.nn.Module,
+                 optimizer: torch.nn.Module,
+                 train_dataset: Dataset,
+                 val_dataset: Dataset,
+                 evaluate: Eval,
+                 train_batch_size: int,
+                 val_batch_size: int,
+                 epochs: int = 50,
+                 num_workers: int = 0,
+                 save_all: bool = False,
                  use_tiling=False):
         super().__init__(model, loss_fn, optimizer, train_dataset,
-                         val_dataset, train_batch_size, val_batch_size, epochs)
+                         val_dataset, evaluate, train_batch_size, val_batch_size,
+                         epochs, num_workers, save_all)
         self.use_tiling = use_tiling
 
     def val_step(self):
@@ -43,22 +53,33 @@ class RestorationWorkflow(SWorkflow):
         -------
         A dictionary of data to save/log/process
         This dictionary must contain at least the val_loss entry
-
         """
+        out_dir = Path(self.out_dir, "evals", f"epoch_{self.current_epoch}")
+        out_dir.mkdir(parents=True)
+
         num_batches = len(self.val_data_loader)
         self.model.eval()
-        print('val step use tiling=', self.use_tiling)
         val_loss = 0
-        for x, y, _ in self.val_data_loader:
-            x, y = x.to(self.device), y.to(self.device)
+        if self.save_all:
+            self.evaluate.clear()
+
+        for x, y, idx in self.val_data_loader:
+            x, y = x.to(device()), y.to(device())
             if self.use_tiling:
                 tile_predict = TilePredict(self.model)
-                pred = tile_predict.run(x)
+                prediction = tile_predict.run(x)
             else:
                 with torch.no_grad():
-                    pred = self.model(x)
-            val_loss += self.loss_fn(pred, y).item()
+                    prediction = self.model(x)
+            val_loss += self.loss_fn(prediction, y).item()
+            if self.save_all:
+                for i, id_ in enumerate(idx):
+                    self.evaluate.eval_step(prediction[i, ...], y[i, ...], id_, out_dir)
         val_loss /= num_batches
+
+        if self.save_all:
+            self.evaluate.eval(out_dir)
+
         return {'val_loss': val_loss}
 
     def after_train(self):
@@ -66,23 +87,22 @@ class RestorationWorkflow(SWorkflow):
         SWorkflow.after_train(self)
 
         # create the output dir
-        predictions_dir = os.path.join(self.out_dir, 'predictions')
-        if os.path.isdir(self.out_dir):
-            os.mkdir(predictions_dir)
+        predictions_dir = Path(self.out_dir, 'predictions')
+        predictions_dir.mkdir(parents=True, exist_ok=True)
 
         # predict on all the test set
         self.model.eval()
         for x, _, names in self.val_data_loader:
-            x = x.to(self.device)
+            x = x.to(device())
             if self.use_tiling:
                 tile_predict = TilePredict(self.model)
-                pred = tile_predict.run(x)
+                prediction = tile_predict.run(x)
             else:
                 with torch.no_grad():
-                    pred = self.model(x)
+                    prediction = self.model(x)
             for i, name in enumerate(names):
-                imsave(os.path.join(predictions_dir, name),
-                       pred[i, :, :].cpu().numpy())
+                imsave(Path(predictions_dir, name + ".tif"),
+                       prediction[i, ...].cpu().numpy())
 
 
 export = [RestorationWorkflow]

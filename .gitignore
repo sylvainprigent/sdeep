@@ -8,3 +8,4 @@ CMakeLists.txt.user
 runs/
 saved_models/
 data/
+__pycache__

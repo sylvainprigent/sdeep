@@ -17,6 +17,7 @@ from .tile_predict import TilePredict
 from .parameters import SParameters
 from .parameters import SParametersReader
 
+from .device import device
 
 __all__ = ['SDataLogger',
            'STensorboardLogger',
@@ -25,5 +26,6 @@ __all__ = ['SDataLogger',
            'SConsoleLogger',
            'TilePredict',
            'SParameters',
-           'SParametersReader'
+           'SParametersReader',
+           'device'
            ]

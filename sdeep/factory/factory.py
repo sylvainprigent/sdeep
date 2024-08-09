@@ -1,12 +1,13 @@
 """Factory to instantiate modules"""
-from typing import Dict
-from typing import List
+from typing import Callable
 
 import os
 import importlib
 
 import torch
 from torch.utils.data import Dataset
+
+from sdeep.evals.interface import Eval
 
 from ..workflows import SWorkflow
 
@@ -23,6 +24,8 @@ class SFactory:
         self.__optims = self.__register_modules("optims")
         self.__datasets = self.__register_modules("datasets")
         self.__workflows = self.__register_modules("workflows")
+        self.__evals = self.__register_modules("evals")
+        self.__transforms = self.__register_modules("transforms")
 
     def __register_modules(self, directory: str):
         modules = self.__find_modules(directory)
@@ -34,7 +37,7 @@ class SFactory:
         return modules_info
 
     @staticmethod
-    def __find_modules(directory: str) -> List:
+    def __find_modules(directory: str) -> list:
         """Search for modules in a specific directory
 
         :param directory: Directory to parse
@@ -49,13 +52,14 @@ class SFactory:
                 if str(module_path).endswith(".py") and \
                         'setup' not in module_path and \
                         'utils' not in module_path and \
-                        '__init__' not in module_path and not \
-                        str(module_path).startswith("_"):
+                        '__init__' not in module_path and \
+                        not str(module_path).startswith("interface") and \
+                        not str(module_path).startswith("_"):
                     module_name = str(module_path).split('.', maxsplit=1)[0]
                     modules.append(f"sdeep.{parent}.{module_name}")
         return modules
 
-    def get_model(self, name: str, args: Dict) -> torch.nn.Module:
+    def get_model(self, name: str, args: dict[str, any]) -> torch.nn.Module:
         """Instantiate a model
 
         :param name: name of the model
@@ -64,9 +68,11 @@ class SFactory:
         """
         if name not in self.__models:
             raise SFactoryError(f'No implementation found for {name}')
-        return self.__models[name](**args)
+        model = self.__models[name](**args)
+        model.args = args
+        return model
 
-    def get_loss(self, name: str, args: Dict) -> torch.nn.Module:
+    def get_loss(self, name: str, args: dict[str, any]) -> torch.nn.Module:
         """Instantiate a loss
 
         :param name: name of the loss
@@ -79,7 +85,7 @@ class SFactory:
 
     def get_optim(self, name: str,
                   model: torch.nn.Module,
-                  args: Dict) -> torch.nn.Module:
+                  args: dict[str, any]) -> torch.nn.Module:
         """Instantiate an optim scheme
 
         :param name: name of the optim
@@ -91,16 +97,41 @@ class SFactory:
             raise SFactoryError(f'No implementation found for {name}')
         return self.__optims[name](model.parameters(), **args)
 
-    def get_dataset(self, name: str, args: Dict) -> Dataset:
+    def get_dataset(self, name: str, args: dict[str, any], transform: Callable = None) -> Dataset:
         """Instantiate a dataset
 
         :param name: name of the dataset
         :param args: parameters of the dataset
+        :param transform: Data transformation
         :return: an instance of the dataset
         """
         if name not in self.__datasets:
             raise SFactoryError(f'No implementation found for {name}')
+        if transform:
+            args["transform"] = transform
         return self.__datasets[name](**args)
+
+    def get_eval(self, name: str, args: dict[str, any]) -> Eval:
+        """Instantiate evaluation module
+
+        :param name: name of the evaluation module
+        :param args: parameters of the evaluation module
+        :return: an instance of the evaluation module
+        """
+        if name not in self.__evals:
+            raise SFactoryError(f'No implementation found for {name}')
+        return self.__evals[name](**args)
+
+    def get_transform(self, name: str, args: dict[str, any]) -> Dataset:
+        """Instantiate transformation module
+
+        :param name: name of the evaluation module
+        :param args: parameters of the evaluation module
+        :return: an instance of the evaluation module
+        """
+        if name not in self.__transforms:
+            raise SFactoryError(f'No implementation found for {name}')
+        return self.__transforms[name](**args)
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
@@ -111,7 +142,8 @@ class SFactory:
                      optim: torch.nn.Module,
                      train_dataset: Dataset,
                      val_dataset: Dataset,
-                     args: Dict
+                     evaluate: Eval,
+                     args: dict[str, any]
                      ) -> SWorkflow:
         """Instantiate a dataset
 
@@ -121,10 +153,11 @@ class SFactory:
         :param optim: instance of the optimization scheme,
         :param train_dataset: instance of the train set data loader,
         :param val_dataset: instance of the validation set data loader,
+        :param evaluate: Evaluation method
         :param args: parameters of the workflows
         :return: an instance of the workflow
         """
         if name not in self.__workflows:
             raise SFactoryError(f'No implementation found for {name}')
         return self.__workflows[name](model, loss_fn, optim, train_dataset,
-                                      val_dataset, **args)
+                                      val_dataset, evaluate, **args)

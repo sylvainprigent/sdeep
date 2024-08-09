@@ -3,7 +3,13 @@ import os
 from skimage.io import imsave
 import torch
 
+
+from torch.utils.data import Dataset
+
+from sdeep.utils import device
 from sdeep.utils import TilePredict
+from sdeep.evals import Eval
+
 from .base import SWorkflow
 
 
@@ -23,17 +29,18 @@ class SegmentationWorkflow(SWorkflow):
     :param use_tiling: use tiling or not for prediction
     """
     def __init__(self,
-                 model,
-                 loss_fn,
-                 optimizer,
-                 train_dataset,
-                 val_dataset,
-                 train_batch_size,
-                 val_batch_size,
-                 epochs=50,
+                 model: torch.nn.Module,
+                 loss_fn: torch.nn.Module,
+                 optimizer: torch.nn.Module,
+                 train_dataset: Dataset,
+                 val_dataset: Dataset,
+                 evaluate: Eval,
+                 train_batch_size: int,
+                 val_batch_size: int,
+                 epochs: int = 50,
                  use_tiling=False):
         super().__init__(model, loss_fn, optimizer, train_dataset,
-                         val_dataset, train_batch_size, val_batch_size, epochs)
+                         val_dataset, evaluate, train_batch_size, val_batch_size, epochs)
         self.use_tiling = use_tiling
 
     def val_step(self):
@@ -51,14 +58,14 @@ class SegmentationWorkflow(SWorkflow):
         print("")
         val_loss = 0
         for x, y, _ in self.val_data_loader:
-            x, y = x.to(self.device), y.to(self.device)
+            x, y = x.to(device()), y.to(device())
             if self.use_tiling:
                 tile_predict = TilePredict(self.model)
-                pred = tile_predict.run(x)
+                prediction = tile_predict.run(x)
             else:
                 with torch.no_grad():
-                    pred = self.model(x)
-            val_loss += self.loss_fn(pred, y).item()
+                    prediction = self.model(x)
+            val_loss += self.loss_fn(prediction, y).item()
         val_loss /= num_batches
         return {'val_loss': val_loss}
 
@@ -74,16 +81,16 @@ class SegmentationWorkflow(SWorkflow):
         # predict on all the test set
         self.model.eval()
         for x, _, names in self.val_data_loader:
-            x = x.to(self.device)
+            x = x.to(device())
             if self.use_tiling:
                 tile_predict = TilePredict(self.model)
-                pred = tile_predict.run(x)
+                prediction = tile_predict.run(x)
             else:
                 with torch.no_grad():
-                    pred = self.model(x)
+                    prediction = self.model(x)
             for i, name in enumerate(names):
                 imsave(os.path.join(predictions_dir, name),
-                       pred[i, :, :].cpu().numpy())
+                       prediction[i, :, :].cpu().numpy())
 
 
 export = [SegmentationWorkflow]

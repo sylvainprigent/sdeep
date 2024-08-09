@@ -6,12 +6,15 @@ RestorationDataset
 
 
 """
+from typing import Callable
+
 import os
 import numpy as np
 import torch
-from torch.utils.data import Dataset
 from natsort import natsorted
 from skimage import io
+
+from torch.utils.data import Dataset
 
 
 class RestorationDataset(Dataset):
@@ -20,21 +23,16 @@ class RestorationDataset(Dataset):
     All the training images must be saved as individual images in source and
     target folders.
 
-    Parameters
-    ----------
-    source_dir: str
-        Path of the noisy training images (or patches)
-    target_dir: str
-        Path of the ground truth images (or patches)
-    use_data_augmentation: bool
-        True to use data augmentation. False otherwise. The data augmentation is
-        90, 180, 270 degrees rotations and flip (horizontal or vertical)
+    :param source_dir: Path of the noisy training images (or patches)
+    :param target_dir: Path of the ground truth images (or patches)
+    :param transform: Transformation to apply to the image before model call
     """
-
-    def __init__(self, source_dir, target_dir, use_data_augmentation=True):
+    def __init__(self, source_dir, target_dir, transform: Callable = None):
+        super().__init__()
+        self.device = None
         self.source_dir = source_dir
         self.target_dir = target_dir
-        self.use_data_augmentation = use_data_augmentation
+        self.transform = transform
 
         self.source_images = natsorted(os.listdir(source_dir))
         self.target_images = natsorted(os.listdir(target_dir))
@@ -57,16 +55,9 @@ class RestorationDataset(Dataset):
                                               self.target_images[idx])))
 
         # data augmentation
-        if self.use_data_augmentation:
-            # rotation
-            k_1 = np.random.randint(4)
-            img_source_np = np.rot90(img_source_np, k_1)
-            img_target_np = np.rot90(img_target_np, k_1)
-            # flip
-            k_2 = np.random.randint(3)
-            if k_2 < 2:
-                img_source_np = np.flip(img_source_np, k_2)
-                img_target_np = np.flip(img_target_np, k_2)
+        if self.transform:
+            img_source_np = self.transform(img_source_np)
+            img_target_np = self.transform(img_target_np)
 
         # numpy continuous array
         img_source_np = np.ascontiguousarray(img_source_np)
@@ -87,30 +78,24 @@ class RestorationPatchDataset(Dataset):
     All the training images must be saved as individual images in source and
     target folders.
 
-    Parameters
-    ----------
-    source_dir: str
-        Path of the noisy training images (or patches)
-    target_dir: str
-        Path of the ground truth images (or patches)
-    patch_size: int
-        Size of the patches (width=height)
-    stride: int
-        Length of the patch overlapping
-    use_data_augmentation: bool
-        True to use data augmentation. False otherwise. The data augmentation is
-        90, 180, 270 degrees rotations and flip (horizontal or vertical)
+    :param source_dir: Path of the noisy training images (or patches)
+    :param target_dir: Path of the ground truth images (or patches)
+    :param patch_size: Size of the patches (width=height)
+    :param stride: Length of the patch overlapping
+    :param transform: Transformation to apply to the image before model call
 
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
     def __init__(self, source_dir, target_dir, patch_size=40, stride=10,
-                 use_data_augmentation=True):
+                 transform: Callable = None):
+        super().__init__()
+        self.device = None
         self.source_dir = source_dir
         self.target_dir = target_dir
         self.patch_size = patch_size
         self.stride = stride
-        self.use_data_augmentation = use_data_augmentation
+        self.transform = transform
 
         self.source_images = natsorted(os.listdir(source_dir))
         self.target_images = natsorted(os.listdir(target_dir))
@@ -147,16 +132,9 @@ class RestorationPatchDataset(Dataset):
             j * self.stride:j * self.stride + self.patch_size]
 
         # data augmentation
-        if self.use_data_augmentation:
-            # rotation
-            k_1 = np.random.randint(4)
-            source_patch = np.rot90(source_patch, k_1)
-            target_patch = np.rot90(target_patch, k_1)
-            # flip
-            k_2 = np.random.randint(3)
-            if k_2 < 2:
-                source_patch = np.flip(source_patch, k_2)
-                target_patch = np.flip(target_patch, k_2)
+        if self.transform:
+            source_patch = self.transform(source_patch)
+            target_patch = self.transform(target_patch)
 
         # numpy continuous array
         source_patch = np.ascontiguousarray(source_patch)
@@ -171,48 +149,33 @@ class RestorationPatchDataset(Dataset):
                 )
 
 
-class RestorationPatchDataset2(Dataset):
+class RestorationPatchDatasetLoad(Dataset):
     """Dataset to train from patches
 
     All the training images must be saved as individual images in source and
     target folders.
-    This version load all the dataset in the GPU
+    This version load all the dataset in the CPU
 
-    Parameters
-    ----------
-    source_dir: str
-        Path of the noisy training images (or patches)
-    target_dir: str
-        Path of the ground truth images (or patches)
-    patch_size: int
-        Size of the patches (width=height)
-    stride: int
-        Length of the patch overlapping
-    use_data_augmentation: bool
-        True to use data augmentation. False otherwise. The data augmentation is
-        90, 180, 270 degrees rotations and flip (horizontal or vertical)
+    :param source_dir: Path of the noisy training images (or patches)
+    :param target_dir: Path of the ground truth images (or patches)
+    :param patch_size: Size of the patches (width=height)
+    :param stride: Length of the patch overlapping
+    :param transform: Transformation to apply to the image before model call
 
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
     def __init__(self, source_dir, target_dir, patch_size=40, stride=10,
-                 use_data_augmentation=True):
-
-        # self.device = "cuda" if torch.cuda.is_available() else "cpu"
+                 transform: Callable = None):
+        super().__init__()
         self.source_dir = source_dir
         self.target_dir = target_dir
         self.patch_size = patch_size
         self.stride = stride
-        self.use_data_augmentation = use_data_augmentation
-
-        #print('source dir=', source_dir)
-        #print('target dir=', target_dir)
+        self.transform = transform
 
         self.source_images = natsorted(os.listdir(source_dir))
         self.target_images = natsorted(os.listdir(target_dir))
-
-        #print('source len=', len(self.source_images))
-        #print('target len=', len(self.target_images))
 
         if len(self.source_images) != len(self.target_images):
             raise Exception("Source and target dirs are not the same length")
@@ -221,6 +184,7 @@ class RestorationPatchDataset2(Dataset):
         image = io.imread(os.path.join(self.source_dir, self.source_images[0]))
         self.n_patches = self.nb_images * ((image.shape[0] - patch_size) // stride) * \
                                           ((image.shape[1] - patch_size) // stride)
+        print('num patches = ', self.n_patches)
 
         # Load all the images in a list
         self.source_data = []
@@ -242,9 +206,6 @@ class RestorationPatchDataset2(Dataset):
         img_source_np = self.source_data[img_number]
         img_target_np = self.target_data[img_number]
 
-        #print('img_source_np shape=', img_source_np.shape)
-        #print('img_target_np shape=', img_target_np.shape)
-
         nb_patch_w = (img_source_np.shape[1] - self.patch_size) // self.stride
         idx = idx % nb_patch_per_img
         i, j = idx // nb_patch_w, idx % nb_patch_w
@@ -256,25 +217,13 @@ class RestorationPatchDataset2(Dataset):
             j * self.stride:j * self.stride + self.patch_size]
 
         # data augmentation
-        if self.use_data_augmentation:
-            # rotation
-            k_1 = np.random.randint(4)
-            source_patch = np.rot90(source_patch, k_1)
-            target_patch = np.rot90(target_patch, k_1)
-            # flip
-            k_2 = np.random.randint(3)
-            if k_2 < 2:
-                source_patch = np.flip(source_patch, k_2)
-                target_patch = np.flip(target_patch, k_2)
+        if self.transform:
+            source_patch = self.transform(source_patch)
+            target_patch = self.transform(target_patch)
 
         # numpy continuous array
         source_patch = np.ascontiguousarray(source_patch)
         target_patch = np.ascontiguousarray(target_patch)
-
-        # to tensor
-
-        #print('source shape = ', source_patch.shape)
-        #print('target shape = ', target_patch.shape)
 
         return (torch.from_numpy(source_patch).view(1, *source_patch.shape)
                 .float(),
@@ -286,5 +235,5 @@ class RestorationPatchDataset2(Dataset):
 
 export = [RestorationDataset,
           RestorationPatchDataset,
-          RestorationPatchDataset2
+          RestorationPatchDatasetLoad
           ]

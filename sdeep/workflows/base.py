@@ -5,14 +5,19 @@ Classes
 SWorkflow
 
 """
-import os
+from pathlib import Path
 from timeit import default_timer as timer
 
 import torch
+from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
-from sdeep.utils import SProgressObservable, SDataLogger
+from sdeep.utils import device, SProgressObservable, SDataLogger
+from sdeep.utils.progress_loggers import SProgressLogger
 from sdeep.utils.utils import seconds2str
+from sdeep.utils.io import save_model
+
+from sdeep.evals import Eval
 
 
 class SWorkflow:
@@ -23,9 +28,12 @@ class SWorkflow:
     :param optimizer: Back propagation optimizer
     :param train_dataset: Training dataset
     :param val_dataset: Validation dataset
+    :param evaluate: Evaluation method
     :param train_batch_size: Size of a training batch
     :param val_batch_size: Size of a validation batch
     :param epochs: Number of epoch for training
+    :param num_workers: Number of workers for data loading
+    :param save_all: Save model and run evals to all epoch
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
@@ -33,27 +41,31 @@ class SWorkflow:
                  model: torch.nn.Module,
                  loss_fn: torch.nn.Module,
                  optimizer: torch.nn.Module,
-                 train_dataset: torch.utils.data.Dataset,
-                 val_dataset: torch.utils.data.Dataset,
+                 train_dataset: Dataset,
+                 val_dataset: Dataset,
+                 evaluate: Eval,
                  train_batch_size: int,
                  val_batch_size: int,
-                 epochs: int = 50):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+                 epochs: int = 50,
+                 num_workers: int = 0,
+                 save_all: bool = False):
 
-        self.model = model.to(self.device)
+        self.model = model.to(device())
         self.loss_fn = loss_fn
         self.optimizer = optimizer
+        self.evaluate = evaluate
         self.train_data_loader = DataLoader(train_dataset,
                                             batch_size=train_batch_size,
                                             shuffle=True,
                                             drop_last=True,
-                                            num_workers=0)
+                                            num_workers=num_workers)
         self.val_data_loader = DataLoader(val_dataset,
                                           batch_size=val_batch_size,
                                           shuffle=False,
                                           drop_last=False,
                                           num_workers=0)
         self.epochs = epochs
+        self.save_all = save_all
 
         self.logger = None
         self.progress = SProgressObservable()
@@ -87,14 +99,10 @@ class SWorkflow:
         self.progress = observable
         self.progress.set_prefix(self.__class__.__name__)
 
-    def add_progress_logger(self, logger):
+    def add_progress_logger(self, logger: SProgressLogger):
         """Add one progress logger
 
-        Parameters
-        ----------
-        logger: SProgressLogger
-            Instance of a progress logger
-
+        :param logger: Instance of a progress logger
         """
         logger.prefix = self.__class__.__name__
         self.progress.add_logger(logger)
@@ -107,15 +115,16 @@ class SWorkflow:
         num_parameters = sum(p.numel() for p in
                              self.model.parameters() if p.requires_grad)
 
-        dummy_input = torch.rand(1, 1, 40, 40).to(self.device)
-        self.logger.add_graph(self.model, dummy_input)
-        self.logger.flush()
-        self.progress.message(f"Using {self.device} device")
+        if hasattr(self.model, 'input_shape'):
+            dummy_input = torch.rand([1, 1, *self.model.input_shape]).to(device())
+            self.logger.add_graph(self.model, dummy_input)
+            self.logger.flush()
+        self.progress.message(f"Using {device()} device")
         self.progress.message(f"Model number of parameters: "
                               f"{num_parameters:d}")
 
-        checkpoint_file = os.path.join(self.out_dir, 'checkpoint.ckpt')
-        if os.path.isfile(checkpoint_file):
+        checkpoint_file = Path(self.out_dir, 'checkpoint.ckpt')
+        if checkpoint_file.is_file():
             self.progress.message("Initialize training from checkpoint")
             self.load_checkpoint(checkpoint_file)
 
@@ -124,34 +133,47 @@ class SWorkflow:
 
         This method can be used to log data or print console messages
         """
+        if self.evaluate:
+            out_dir = Path(self.out_dir, "evals", "final")
+            out_dir.mkdir(parents=True)
+
+            self.model.eval()
+            self.evaluate.clear()
+            with torch.no_grad():
+                for x, y, idx in self.val_data_loader:
+                    x, y = x.to(device()), y.to(device())
+                    prediction = self.model(x)
+                    for i, id_ in enumerate(idx):
+                        self.evaluate.eval_step(prediction[i, ...], y[i, ...], id_, out_dir)
+
+            self.evaluate.eval(out_dir)
+
         self.progress.new_line()
         self.logger.close()
 
-    def after_train_step(self, data):
+    def after_train_step(self, data: dict):
         """Instructions runs after one train step.
 
         This method can be used to log data or print console messages
 
-        Parameters
-        ----------
-        data: dict
-            Dictionary of metadata to log or process
+        :param data: Dictionary of metadata to log or process
         """
-        self.logger.add_scalar('train_loss', data['train_loss'],
+        self.logger.add_scalar('train_loss',
+                               data['train_loss'],
                                self.current_epoch)
         self.save_checkpoint()
+        if self.save_all:
+            save_model(self.model,
+                       self.model.args,
+                       Path(self.out_dir, f'model_{self.current_epoch}.ml'))
 
-    def after_train_batch(self, data):
+    def after_train_batch(self, data: dict[str, any]):
         """Instructions runs after one batch
 
-        Parameters
-        ----------
-        data: dict
-            Dictionary of metadata to log or process
-
+        :param data: Dictionary of metadata to log or process
         """
         prefix = f"Epoch = {self.current_epoch:d}"
-        loss_str = f"{data['loss']:.2f}"
+        loss_str = f"{data['loss']:.7f}"
         full_time_str = seconds2str(int(data['full_time']))
         remains_str = seconds2str(int(data['remain_time']))
         suffix = str(data['id_batch']) + '/' + str(data['total_batch']) + \
@@ -172,11 +194,12 @@ class SWorkflow:
         tic = timer()
         for batch, (x, y, _) in enumerate(self.train_data_loader):
             count_step += 1
-            x, y = x.to(self.device), y.to(self.device)
+            x, y = x.to(device()), y.to(device())
 
             # Compute prediction error
-            pred = self.model(x)
-            loss = self.loss_fn(pred, y)
+            prediction = self.model(x)
+
+            loss = self.loss_fn(prediction, y)
             step_loss += loss
 
             # Backpropagation
@@ -196,9 +219,6 @@ class SWorkflow:
                                     'remain_time': int(remains+0.5),
                                     'full_time': int(full_time+0.5)
                                     })
-            # if batch % 100 == 0:
-            #    loss, current = loss.item(), batch * len(X)
-            #    print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
         if count_step > 0:
             step_loss /= count_step
@@ -223,24 +243,31 @@ class SWorkflow:
     def val_step(self):
         """Runs one step of validation
 
-        Returns
-        -------
-        A dictionary of data to save/log/process
-        This dictionary must contain at least the val_loss entry
+        :returns: A dictionary of data to save/log/process, t
+                  This dictionary must contain at least the val_loss entry
 
         """
+        out_dir = Path(self.out_dir, "evals", f"epoch_{self.current_epoch}")
+        out_dir.mkdir(parents=True)
+
         num_batches = len(self.val_data_loader)
         self.model.eval()
         val_loss = 0
+        if self.save_all and self.evaluate:
+            self.evaluate.clear()
         with torch.no_grad():
-            for x, y, _ in self.val_data_loader:
-                x, y = x.to(self.device), y.to(self.device)
-                pred = self.model(x)
-                val_loss += self.loss_fn(pred, y).item()
+            for x, y, idx in self.val_data_loader:
+                x, y = x.to(device()), y.to(device())
+                prediction = self.model(x)
+                val_loss += self.loss_fn(prediction, y).item()
+                if self.save_all and self.evaluate:
+                    for i, id_ in enumerate(idx):
+                        self.evaluate.eval_step(prediction[i, ...], y[i, ...], id_, out_dir)
         val_loss /= num_batches
 
-        # print(
-        #    f"Test Error: \n Avg loss: {test_loss:>8f} \n")
+        if self.save_all and self.evaluate:
+            self.evaluate.eval(out_dir)
+
         return {'val_loss': val_loss}
 
     def train(self):
@@ -263,15 +290,13 @@ class SWorkflow:
         """API function
 
         For the API it is more readable to use fit than train
-
         """
         self.train()
 
     def save_checkpoint(self):
         """Save the model weights as a checkpoint"""
         if self.out_dir != '':
-            self.save_checkpoint_to_file(os.path.join(self.out_dir,
-                                                      'checkpoint.ckpt'))
+            self.save_checkpoint_to_file(Path(self.out_dir, 'checkpoint.ckpt'))
 
     def save_checkpoint_to_file(self, path):
         """Save a checkpoint at a given epoch to a file
@@ -295,51 +320,17 @@ class SWorkflow:
         self.current_epoch = checkpoint['epoch']
         self.current_loss = checkpoint['loss']
 
-    def predict(self, x):
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
         """Predict a single input
 
-        Parameters
-        ----------
-        x: Tensor
-            input data. The data is considered in CPU and is moved to GPU if
-            needed.
-
+        :param x: input data. The data is considered in CPU and is moved to GPU if needed.
+        :return: the prediction
         """
-        x_device = x.to(self.device).unsqueeze(0).unsqueeze(0)
+        x_device = x.to(device()).unsqueeze(0).unsqueeze(0)
         self.model.eval()
         with torch.no_grad():
-            pred = self.model(x_device)
-        return pred
-
-    def save_model(self, filename):
-        """Save a model to a file
-
-        Parameters
-        ----------
-        filename: str
-            Path to the destination file
-        """
-        torch.save(self.model, filename)
-
-    def save(self, filename):
-        """Save a model to a file
-
-        Parameters
-        ----------
-        filename: str
-            Path to the destination file
-        """
-        torch.save(self.model.state_dict(), filename)
-
-    def load(self, filename):
-        """Load a model from file
-
-        Parameters
-        ----------
-        filename: str
-            Path of the file containing the model
-        """
-        self.model.load_state_dict(torch.load(filename))
+            prediction = self.model(x_device)
+        return prediction
 
 
 export = [SWorkflow]

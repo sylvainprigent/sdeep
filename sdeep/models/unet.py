@@ -90,10 +90,14 @@ class UNetDecoderBlock(nn.Module):
                  use_batch_norm: bool = True):
         super().__init__()
 
-        self.up = nn.ConvTranspose2d(n_channels_in, n_channels_out,
-                                     kernel_size=2, stride=2, padding=0)
-        self.conv = UNetConvBlock(n_channels_out+n_channels_out,
+        self.up = nn.Upsample(scale_factor=(2, 2), mode='nearest')
+        self.conv = UNetConvBlock(n_channels_in+n_channels_out,
                                   n_channels_out, use_batch_norm)
+
+        #self.up = nn.ConvTranspose2d(n_channels_in, n_channels_out,
+        #                             kernel_size=2, stride=2, padding=0)
+        #self.conv = UNetConvBlock(n_channels_out+n_channels_out,
+        #                          n_channels_out, use_batch_norm)
 
     def forward(self, inputs: torch.Tensor, skip: torch.Tensor):
         """Module torch forward
@@ -102,7 +106,7 @@ class UNetDecoderBlock(nn.Module):
         :param skip: skip connection tensor
         """
         x = self.up(inputs)
-        x = torch.cat([x, skip], axis=1)
+        x = torch.cat([x, skip], dim=1)
         x = self.conv(x)
 
         return x
@@ -125,6 +129,7 @@ class UNet(nn.Module):
         super().__init__()
 
         self.receptive_field = 32
+        self.input_shape = [32, 32]
         # Encoder
         self.e1 = UNetEncoderBlock(n_channels_in, n_feature_first,
                                    use_batch_norm)
@@ -147,7 +152,7 @@ class UNet(nn.Module):
 
         :param inputs: input tensor
         """
-        y = inputs
+        # y = inputs
         # Encoder
         s1, p1 = self.e1(inputs)
         s2, p2 = self.e2(p1)
@@ -162,7 +167,16 @@ class UNet(nn.Module):
         # Classifier
         outputs = self.outputs(d2)
 
-        return y + outputs
+        return outputs
+
+    def encode(self, inputs: torch.Tensor):
+        # Encoder
+        _, p1 = self.e1(inputs)
+        _, p2 = self.e2(p1)
+
+        # Bottleneck
+        b = self.b(p2)
+        return b
 
 
 export = [UNet]

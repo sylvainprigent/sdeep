@@ -1,13 +1,18 @@
 """Default dataset for training image segmentation network"""
-from typing import List
+from typing import Callable
+from pathlib import Path
+
 import os
 import numpy as np
 import torch
-from torch.utils.data import Dataset
+
 from natsort import natsorted
+
 from skimage import io
 from skimage.measure import label
 from skimage.measure import regionprops
+
+from torch.utils.data import Dataset
 
 
 class SegmentationDataset(Dataset):
@@ -16,21 +21,17 @@ class SegmentationDataset(Dataset):
     All the training images must be saved as individual images in source and
     target folders.
 
-    Parameters
-    ----------
-    source_dir: str
-        Path of the images to segment (or patches)
-    target_dir: str
-        Path of the ground truth segmentation (or patches)
-    use_data_augmentation: bool
-        True to use data augmentation. False otherwise. The data augmentation
-        is 90, 180, 270 degrees rotations and flip (horizontal or vertical)
+    :param source_dir: Path of the images to segment (or patches)
+    :param target_dir: Path of the ground truth segmentation (or patches)
+    :param transform: Transformation to apply to the image before model call
     """
 
-    def __init__(self, source_dir, target_dir, use_data_augmentation=True):
+    def __init__(self, source_dir, target_dir, transform: Callable = None):
+        super().__init__()
+        self.device = None
         self.source_dir = source_dir
         self.target_dir = target_dir
-        self.use_data_augmentation = use_data_augmentation
+        self.transform = transform
 
         # load the images
         if not source_dir.endswith(".npy") or not target_dir.endswith(".npy"):
@@ -57,16 +58,9 @@ class SegmentationDataset(Dataset):
         img_target_np /= 255
 
         # data augmentation
-        if self.use_data_augmentation:
-            # rotation
-            k_1 = np.random.randint(4)
-            img_source_np = np.rot90(img_source_np, k_1)
-            img_target_np = np.rot90(img_target_np, k_1)
-            # flip
-            k_2 = np.random.randint(3)
-            if k_2 < 2:
-                img_source_np = np.flip(img_source_np, k_2)
-                img_target_np = np.flip(img_target_np, k_2)
+        if self.transform:
+            img_source_np = self.transform(img_source_np)
+            img_target_np = self.transform(img_target_np)
 
         # numpy continuous array
         img_source_np = np.ascontiguousarray(img_source_np)
@@ -78,8 +72,7 @@ class SegmentationDataset(Dataset):
         target_patch_tensor = torch.from_numpy(img_target_np).\
             view(1, *img_target_np.shape).float()
 
-        return source_patch_tensor, target_patch_tensor, \
-               self.source_images[idx]
+        return source_patch_tensor, target_patch_tensor, str(idx)
 
 
 def find_patches(image: np.ndarray, patch_size: int):
@@ -87,10 +80,10 @@ def find_patches(image: np.ndarray, patch_size: int):
     for i in range(image.shape[0]):
         if np.max(image[i, ...] > 1):
             labels = np.unique(image[i, ...])
-            labels = labels[1:] # remove 0
-            for label in labels:
+            labels = labels[1:]  # remove 0
+            for label_ in labels:
                 regions += find_patches_single(
-                    np.uint8(image[i, ...] == label), patch_size)
+                    np.uint8(image[i, ...] == label_), patch_size)
         else:
             regions += find_patches_single(image[i, ...], patch_size)
     return regions
@@ -117,34 +110,26 @@ class SegmentationPatchDataset(Dataset):
     All the training images must be saved as individual images in source and
     target folders.
 
-    Parameters
-    ----------
-    source_dir: str
-        Path of the images to segment (or patches)
-    target_dir: str
-        Path of the ground truth segmentation images (or patches)
-    patch_size: int
-        Size of the patches (width=height)
-    stride: int
-        Length of the patch overlapping
-    use_data_augmentation: bool
-        True to use data augmentation. False otherwise. The data augmentation
-        is 90, 180, 270 degrees rotations and flip (horizontal or vertical)
+    :param source_dir: Path of the images to segment (or patches)
+    :param target_dir: Path of the ground truth segmentation images (or patches)
+    :param patch_size: Size of the patches (width=height)
+    :param transform: Transformation to apply to the image before model call
 
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, source_dir, target_dir, patch_size=48,
-                 use_data_augmentation=True,
-                 use_labels=False):
+    def __init__(self, source_dir: Path, target_dir: Path, patch_size: int = 48,
+                 use_labels: bool = False, transform: Callable = True,):
+        super().__init__()
+        self.device = None
         self.source_dir = source_dir
         self.target_dir = target_dir
         self.patch_size = patch_size
-        self.use_data_augmentation = use_data_augmentation
         self.__use_labels = use_labels
+        self.transform = transform
 
         # load the images
-        if not source_dir.endswith(".npy") or not target_dir.endswith(".npy"):
+        if not source_dir.name.endswith(".npy") or not target_dir.name.endswith(".npy"):
             raise FileNotFoundError('SegmentationDataset can only use '
                                     '.npy file')
 
@@ -206,16 +191,9 @@ class SegmentationPatchDataset(Dataset):
             target_patch = target_patch / 255
 
         # data augmentation
-        if self.use_data_augmentation:
-            # rotation
-            k_1 = np.random.randint(4)
-            source_patch = np.rot90(source_patch, k_1, axes=(0, 1))
-            target_patch = np.rot90(target_patch, k_1, axes=(1, 2))
-            # flip
-            k_2 = np.random.randint(3)
-            if k_2 < 2:
-                source_patch = np.flip(source_patch, k_2)
-                target_patch = np.flip(target_patch, k_2+1)
+        if self.transform:
+            source_patch = self.transform(source_patch)
+            target_patch = self.transform(target_patch)
 
         # numpy continuous array
         if self.__use_labels:        
@@ -247,7 +225,7 @@ def load_sequence(filenames: str, parent_dir: str) -> np.ndarray:
     return np.array(data)    
 
 
-def target_dir_files(target_dir: str) -> List[List[str]]:
+def target_dir_files(target_dir: str) -> list[list[str]]:
     """Get the list of files for each layer of target"""
     subfolders = [ f.path for f in os.scandir(target_dir) if f.is_dir() ]
     if len(subfolders) > 0:
@@ -280,18 +258,20 @@ class SegmentationFileDataset(Dataset):
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, source_dir, target_dir,
-                 use_data_augmentation=True,
-                 use_labels=False):
+    def __init__(self,
+                 source_dir: Path,
+                 target_dir: Path,
+                 use_labels: bool = False,
+                 transform: Callable = True):
+        super().__init__()
 
-        # self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.source_dir = source_dir
         self.target_dir = target_dir
-        self.use_data_augmentation = use_data_augmentation
         self.__use_labels = use_labels
+        self.transform = transform
 
         self.source_images = natsorted(os.listdir(source_dir))
-        self.target_images = target_dir_files(target_dir)
+        self.target_images = target_dir_files(str(target_dir))
 
         if len(self.source_images) != len(self.target_images):
             raise Exception("Source and target dirs are not the same length")
@@ -303,7 +283,7 @@ class SegmentationFileDataset(Dataset):
                 os.path.join(self.source_dir, source))))
         self.target_data = []
         for target in self.target_images:
-            self.target_data.append(load_sequence(target, self.target_dir))
+            self.target_data.append(load_sequence(target, str(self.target_dir)))
 
         self.nb_images = len(os.listdir(source_dir))
 
@@ -322,16 +302,9 @@ class SegmentationFileDataset(Dataset):
             img_target_np = self.target_data[idx] / 255
 
         # data augmentation
-        if self.use_data_augmentation:
-            # rotation
-            k_1 = np.random.randint(4)
-            img_source_np = np.rot90(img_source_np, k_1, axes=(0, 1))
-            img_target_np = np.rot90(img_target_np, k_1, axes=(1, 2))
-            # flip
-            k_2 = np.random.randint(3)
-            if k_2 < 2:
-                img_source_np = np.flip(img_source_np, k_2)
-                img_target_np = np.flip(img_target_np, k_2+1)
+        if self.transform:
+            img_source_np = self.transform(img_source_np)
+            img_target_np = self.transform(img_target_np)
 
         # numpy continuous array
         img_source_np = np.ascontiguousarray(img_source_np)
