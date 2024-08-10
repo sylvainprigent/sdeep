@@ -1,6 +1,6 @@
 """Dice loss implementation"""
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 class BinaryDiceLoss(nn.Module):
@@ -11,7 +11,7 @@ class BinaryDiceLoss(nn.Module):
     """
     def __init__(self,
                  smooth: int = 0, ):
-        super(BinaryDiceLoss, self).__init__()
+        super().__init__()
         self.smooth = smooth
 
     def forward(self, predict, target):
@@ -33,7 +33,7 @@ class DiceLoss(nn.Module):
                  smooth: int = 0,
                  weights: torch.Tensor = None,
                  ignore_index: int = None):
-        super(DiceLoss, self).__init__()
+        super().__init__()
         self.smooth = smooth
         self.weights = weights
         self.ignore_index = ignore_index

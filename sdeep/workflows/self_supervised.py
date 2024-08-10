@@ -1,4 +1,4 @@
-"""Workflow to apply Noise2Void"""
+"""Workflow to apply Self supervised learning"""
 import os
 from timeit import default_timer as timer
 
@@ -54,7 +54,7 @@ def generate_mask(img_shape: tuple[int, int], ratio: float) -> torch.Tensor:
 
 
 def generate_mask_n2v(image: torch.Tensor, ratio: float) -> tuple[torch.Tensor, torch.Tensor]:
-    """Generate a blind spots mask fot the patch image
+    """Generate a blind spots mask fot the patch image by randomly switch pixels values
 
     :param image: Image patch to add blind spots
     :param ratio: Ratio of blind spots for input patch masking
@@ -128,7 +128,7 @@ def generate_mask_n2i(image: torch.Tensor, ratio: float) -> tuple[torch.Tensor, 
 
 
 def generate_mask_n2s(image: torch.Tensor, ratio: float) -> tuple[torch.Tensor, torch.Tensor]:
-    """Generate a Noise2Self mask
+    """Generate a blind spots mask by setting to zero random pixels
 
     :param image: Image to mask,
     :param ratio: Ratio of pixels to mask,
@@ -140,7 +140,7 @@ def generate_mask_n2s(image: torch.Tensor, ratio: float) -> tuple[torch.Tensor, 
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-many-arguments
-class N2XWorkflow(SWorkflow):
+class SelfSupervisedWorkflow(SWorkflow):
     """Workflow to train and predict a restoration neural network
 
     :param model: Neural network model
@@ -181,12 +181,11 @@ class N2XWorkflow(SWorkflow):
         """
         if self.mask_type == 'n2v':
             return generate_mask_n2v(x, ratio)
-        elif self.mask_type == 'n2s':
+        if self.mask_type == 'n2s':
             return generate_mask_n2s(x, ratio)
-        elif self.mask_type == 'n2i':
+        if self.mask_type == 'n2i':
             return generate_mask_n2i(x, ratio)
-        else:
-            raise ValueError('N2VWorkflow: mask_type not recognized must be :n2v, n2s or n2i')
+        raise ValueError("'mask_type' not recognized must be: 'n2v', 'n2s' or 'n2i'")
 
     def train_step(self):
         """Runs one step of training"""
@@ -195,16 +194,15 @@ class N2XWorkflow(SWorkflow):
         step_loss = 0
         count_step = 0
         tic = timer()
-        for batch, (x, y, _) in enumerate(self.train_data_loader):
+        for batch, (x, _) in enumerate(self.train_data_loader):
             count_step += 1
 
             masked_x, mask = self.apply_mask(x, self.ratio)
-
-            masked_x, y, mask = masked_x.to(device()), y.to(device()), mask.to(device())
+            x, masked_x, mask = x.to(device()), masked_x.to(device()), mask.to(device())
 
             # Compute prediction error
-            pred = self.model(masked_x)
-            loss = self.loss_fn(pred, y, mask)
+            prediction = self.model(masked_x)
+            loss = self.loss_fn(prediction, x, mask)
             step_loss += loss
 
             # Backpropagation
@@ -246,14 +244,14 @@ class N2XWorkflow(SWorkflow):
         self.model.eval()
         print('')
         val_loss = 0
-        for x, y, _ in self.val_data_loader:
+        for x, _ in self.val_data_loader:
 
             masked_x, mask = self.apply_mask(x, self.ratio)
-            masked_x, y, mask = masked_x.to(device()), y.to(device()), mask.to(device())
+            x, masked_x, mask = x.to(device()), masked_x.to(device()), mask.to(device())
 
             with torch.no_grad():
-                pred = self.model(masked_x)
-            val_loss += self.loss_fn(pred, y, mask).item()
+                prediction = self.model(masked_x)
+            val_loss += self.loss_fn(prediction, x, mask).item()
         val_loss /= num_batches
         return {'val_loss': val_loss}
 
@@ -268,7 +266,7 @@ class N2XWorkflow(SWorkflow):
 
         # predict on all the test set
         self.model.eval()
-        for x, _, names in self.val_data_loader:
+        for x, names in self.val_data_loader:
             x = x.to(device())
 
             with torch.no_grad():
@@ -278,4 +276,4 @@ class N2XWorkflow(SWorkflow):
                        prediction[i, ...].cpu().numpy())
 
 
-export = [N2XWorkflow]
+export = [SelfSupervisedWorkflow]

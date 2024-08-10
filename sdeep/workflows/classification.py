@@ -67,7 +67,7 @@ class ClassificationWorkflow(SWorkflow):
                 table_data += (f"{name},{p_value.cpu().numpy().item()},"
                                f"{y[i,...].cpu().numpy().item()}\n")
 
-        with open(predictions_dir / "prediction.csv", "w") as file:
+        with open(predictions_dir / "prediction.csv", "w", encoding='utf-8') as file:
             file.write(table_data)
 
 

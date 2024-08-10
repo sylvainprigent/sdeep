@@ -7,11 +7,10 @@ RestorationDataset
 
 """
 from typing import Callable
+from pathlib import Path
 
-import os
 import numpy as np
 import torch
-from natsort import natsorted
 from skimage import io
 
 from torch.utils.data import Dataset
@@ -27,19 +26,22 @@ class RestorationDataset(Dataset):
     :param target_dir: Path of the ground truth images (or patches)
     :param transform: Transformation to apply to the image before model call
     """
-    def __init__(self, source_dir, target_dir, transform: Callable = None):
+    def __init__(self,
+                 source_dir: str | Path,
+                 target_dir: str | Path,
+                 transform: Callable = None):
         super().__init__()
         self.device = None
-        self.source_dir = source_dir
-        self.target_dir = target_dir
+        self.source_dir = Path(source_dir)
+        self.target_dir = Path(target_dir)
         self.transform = transform
 
-        self.source_images = natsorted(os.listdir(source_dir))
-        self.target_images = natsorted(os.listdir(target_dir))
+        self.source_images = sorted(self.source_dir.glob('*.*'))
+        self.target_images = sorted(self.target_dir.glob('*.*'))
         if len(self.source_images) != len(self.target_images):
             raise Exception("Source and target dirs are not the same length")
 
-        self.nb_images = len(os.listdir(source_dir))
+        self.nb_images = len(self.source_images)
 
     def __len__(self):
         return self.nb_images
@@ -47,12 +49,10 @@ class RestorationDataset(Dataset):
     def __getitem__(self, idx):
 
         img_source_np = \
-            np.float32(io.imread(os.path.join(self.source_dir,
-                                              self.source_images[idx])))
+            np.float32(io.imread(self.source_images[idx]))
 
         img_target_np = \
-            np.float32(io.imread(os.path.join(self.target_dir,
-                                              self.target_images[idx])))
+            np.float32(io.imread(self.target_images[idx]))
 
         # data augmentation
         if self.transform:
@@ -69,7 +69,7 @@ class RestorationDataset(Dataset):
         target_patch_tensor = torch.from_numpy(img_target_np).\
             view(1, *img_target_np.shape).float()
 
-        return source_patch_tensor, target_patch_tensor, self.source_images[idx]
+        return source_patch_tensor, target_patch_tensor, self.source_images[idx].stem
 
 
 class RestorationPatchDataset(Dataset):
@@ -97,13 +97,13 @@ class RestorationPatchDataset(Dataset):
         self.stride = stride
         self.transform = transform
 
-        self.source_images = natsorted(os.listdir(source_dir))
-        self.target_images = natsorted(os.listdir(target_dir))
+        self.source_images = sorted(self.source_dir.glob('*.*'))
+        self.target_images = sorted(self.target_dir.glob('*.*'))
         if len(self.source_images) != len(self.target_images):
             raise Exception("Source and target dirs are not the same length")
 
-        self.nb_images = len(os.listdir(source_dir))
-        image = io.imread(os.path.join(self.source_dir, self.source_images[0]))
+        self.nb_images = len(self.source_images)
+        image = io.imread(self.source_images[0])
         self.n_patches = self.nb_images * ((image.shape[0] - patch_size) // stride) * \
                                           ((image.shape[1] - patch_size) // stride)
 
@@ -117,9 +117,9 @@ class RestorationPatchDataset(Dataset):
         elt = self.source_images[idx // nb_patch_per_img]
 
         img_source_np = \
-            np.float32(io.imread(os.path.join(self.source_dir, elt)))
+            np.float32(io.imread(self.source_dir / elt))
         img_target_np = \
-            np.float32(io.imread(os.path.join(self.target_dir, elt)))
+            np.float32(io.imread(self.target_dir / elt))
 
         nb_patch_w = (img_source_np.shape[1] - self.patch_size) // self.stride
         idx = idx % nb_patch_per_img
@@ -174,14 +174,14 @@ class RestorationPatchDatasetLoad(Dataset):
         self.stride = stride
         self.transform = transform
 
-        self.source_images = natsorted(os.listdir(source_dir))
-        self.target_images = natsorted(os.listdir(target_dir))
+        self.source_images = sorted(self.source_dir.glob('*.*'))
+        self.target_images = sorted(self.target_dir.glob('*.*'))
 
         if len(self.source_images) != len(self.target_images):
             raise Exception("Source and target dirs are not the same length")
 
-        self.nb_images = len(os.listdir(source_dir))
-        image = io.imread(os.path.join(self.source_dir, self.source_images[0]))
+        self.nb_images = len(self.source_images)
+        image = io.imread(self.source_images[0])
         self.n_patches = self.nb_images * ((image.shape[0] - patch_size) // stride) * \
                                           ((image.shape[1] - patch_size) // stride)
         print('num patches = ', self.n_patches)
@@ -189,10 +189,10 @@ class RestorationPatchDatasetLoad(Dataset):
         # Load all the images in a list
         self.source_data = []
         for source in self.source_images:
-            self.source_data.append(np.float32(io.imread(os.path.join(self.source_dir, source))))
+            self.source_data.append(np.float32(io.imread(source)))
         self.target_data = []
         for target in self.target_images:
-            self.target_data.append(np.float32(io.imread(os.path.join(self.target_dir, target))))
+            self.target_data.append(np.float32(io.imread(target)))
 
     def __len__(self):
         return self.n_patches

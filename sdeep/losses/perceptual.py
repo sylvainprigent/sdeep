@@ -12,7 +12,7 @@ class VGGL1PerceptualLoss(torch.nn.Module):
     :param resize: True to resize tensor to VGG input shape
     """
     def __init__(self, weight: float = 1.0, resize: bool = False):
-        super(VGGL1PerceptualLoss, self).__init__()
+        super().__init__()
         self.weight = weight
         blocks = []
         blocks.append(torchvision.models.vgg16(
@@ -36,23 +36,23 @@ class VGGL1PerceptualLoss(torch.nn.Module):
         self.mae = torch.nn.L1Loss()
 
     def forward(self,
-                input: torch.Tensor,
+                source: torch.Tensor,
                 target: torch.Tensor,
                 feature_layers: List[int] = (0, 1, 2, 3),
                 style_layers: List[int] = ()):
         """Torch forward method"""
-        if input.shape[1] != 3:
-            input = input.repeat(1, 3, 1, 1)
+        if source.shape[1] != 3:
+            source = source.repeat(1, 3, 1, 1)
             target = target.repeat(1, 3, 1, 1)
-        input = (input-self.mean) / self.std
+        source = (source-self.mean) / self.std
         target = (target-self.mean) / self.std
         if self.resize:
-            input = self.transform(input, mode='bilinear',
+            source = self.transform(source, mode='bilinear',
                                    size=(224, 224), align_corners=False)
             target = self.transform(target, mode='bilinear',
                                     size=(224, 224), align_corners=False)
         loss = 0.0
-        x = input
+        x = source
         y = target
         for i, block in enumerate(self.blocks):
             x = block(x)
@@ -66,7 +66,7 @@ class VGGL1PerceptualLoss(torch.nn.Module):
                 gram_y = act_y @ act_y.permute(0, 2, 1)
                 loss += torch.nn.functional.l1_loss(gram_x, gram_y)
 
-        return self.mae(input, target) + self.weight*loss
+        return self.mae(source, target) + self.weight*loss
 
 
 export = [VGGL1PerceptualLoss]

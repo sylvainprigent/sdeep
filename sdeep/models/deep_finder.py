@@ -23,7 +23,7 @@ class DeepFinder(nn.Module):
 
         n_feature_l1 = n_feature_first
         n_feature_l2 = int(3/2*n_feature_first)
-        n_feature_l3= int(2 * n_feature_first)
+        n_feature_l3 = int(2 * n_feature_first)
 
         self.block1 = nn.Sequential(nn.Conv2d(n_channels_in, n_feature_l1, 3,
                                               stride=1, padding=1, bias=False),

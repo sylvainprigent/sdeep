@@ -74,7 +74,8 @@ class DeconSpitfire(torch.nn.Module):
         conv_img = self.__conv_op(input_image)
 
         mse = torch.nn.MSELoss()
-        return mse(target, conv_img) + self.regularization*hv_loss(input_image, weighting=self.weighting)
+        return mse(target, conv_img) + self.regularization*hv_loss(input_image,
+                                                                   weighting=self.weighting)
 
 
 class DeconMSEHessian(torch.nn.Module):

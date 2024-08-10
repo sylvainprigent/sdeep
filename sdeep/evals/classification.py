@@ -37,14 +37,20 @@ class EvalClassification(Eval):
         """
         # precision, recall, f1 scores
         f1_value = f1_score(self.__y_true, self.__y_pred, average=None)
-        precision_value = precision_score(self.__y_true, self.__y_pred, average=None, zero_division=np.nan)
-        recall_value = recall_score(self.__y_true, self.__y_pred, average=None, zero_division=np.nan)
+        precision_value = precision_score(self.__y_true,
+                                          self.__y_pred,
+                                          average=None,
+                                          zero_division=np.nan)
+        recall_value = recall_score(self.__y_true,
+                                    self.__y_pred,
+                                    average=None,
+                                    zero_division=np.nan)
 
         content = "Class,Precision,Recall,F1\n"
-        for c in range(len(f1_value)):
-            content += f"{c},{precision_value[c]},{recall_value[c]},{f1_value[c]}\n"
+        for c, f1_val in enumerate(f1_value):
+            content += f"{c},{precision_value[c]},{recall_value[c]},{f1_val}\n"
 
-        with open(output_dir / "scores.csv", "w") as file:
+        with open(output_dir / "scores.csv", "w", encoding='utf-8') as file:
             file.write(content)
 
         # Confusion matrix

@@ -50,7 +50,8 @@ class Autoencoder(nn.Module):
         encode_patch = image_size / pow(2, len(blocs_channels))
         encode_size = int(blocs_channels[-1] * encode_patch * encode_patch)
         print('encode_size=', encode_size)
-        print(f'encoding reshape ({blocs_channels[-1]}, {encode_patch}, {encode_patch}) to {encode_size}')
+        print(f'encoding reshape ({blocs_channels[-1]}, {encode_patch}, '
+              f'{encode_patch}) to {encode_size}')
 
         self.encoder = nn.Sequential()
         for idx in range(len(blocs_channels)):
@@ -64,7 +65,8 @@ class Autoencoder(nn.Module):
             self.token = nn.Linear(encode_size, encode_size, bias=False)
         else:
             self.m_body = nn.Sequential(
-                nn.Conv2d(blocs_channels[-1], blocs_channels[-1], 3, stride=1, padding=1, bias=False)
+                nn.Conv2d(blocs_channels[-1], blocs_channels[-1], 3, stride=1,
+                          padding=1, bias=False)
             )
 
         self.decoder = nn.Sequential()

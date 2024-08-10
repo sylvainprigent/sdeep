@@ -94,11 +94,6 @@ class UNetDecoderBlock(nn.Module):
         self.conv = UNetConvBlock(n_channels_in+n_channels_out,
                                   n_channels_out, use_batch_norm)
 
-        #self.up = nn.ConvTranspose2d(n_channels_in, n_channels_out,
-        #                             kernel_size=2, stride=2, padding=0)
-        #self.conv = UNetConvBlock(n_channels_out+n_channels_out,
-        #                          n_channels_out, use_batch_norm)
-
     def forward(self, inputs: torch.Tensor, skip: torch.Tensor):
         """Module torch forward
 
@@ -169,7 +164,12 @@ class UNet(nn.Module):
 
         return outputs
 
-    def encode(self, inputs: torch.Tensor):
+    def encode(self, inputs: torch.Tensor) -> torch.Tensor:
+        """Run only the encoder part on the network
+
+        :param inputs: input tensor
+        :return: the embedding tensor
+        """
         # Encoder
         _, p1 = self.e1(inputs)
         _, p2 = self.e2(p1)

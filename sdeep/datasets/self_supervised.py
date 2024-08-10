@@ -9,25 +9,23 @@ from skimage.io import imread
 from torch.utils.data import Dataset
 
 
-class N2XPatchDataset(Dataset):
-    """Gray scaled image patch dataset for Noise2Self
+class SelfSupervisedPatchDataset(Dataset):
+    """Gray scaled image patch dataset for Self supervised learning
 
     :param images_dir: Directory containing the training images
     :param patch_size: Size of the squared training patches
     :param stride: Stride used to extract overlapping patches from images
-    :param ratio: Ratio of blind spots for input patch masking
+    :param transform: Transformation to images before model
     """
     def __init__(self,
                  images_dir: Path,
                  patch_size: int = 40,
                  stride: int = 10,
-                 ratio: float = 0.1,
                  transform: Callable = None):
         super().__init__()
         self.images_dir = Path(images_dir)
         self.patch_size = patch_size
         self.stride = stride
-        self.ratio = ratio
         self.transform = transform
 
         self.source_images = sorted(self.images_dir.glob('*.*'))
@@ -65,24 +63,21 @@ class N2XPatchDataset(Dataset):
 
         return (
             img_patch.view(1, *img_patch.shape),
-            img_patch.view(1, *img_patch.shape),
             str(idx)
         )
 
 
-class N2XDataset(Dataset):
-    """Gray scaled image patch dataset for Noise2Void
+class SelfSupervisedDataset(Dataset):
+    """Gray scaled image patch dataset for Self supervised learning
 
     :param images_dir: Directory containing the training images
-    :param ratio: Ratio of blind spots for input patch masking
+    :param transform: Transformation to images before model
     """
     def __init__(self,
                  images_dir: Path,
-                 ratio: float = 0.1,
                  transform: Callable = None):
         super().__init__()
         self.images_dir = Path(images_dir)
-        self.ratio = ratio
         self.transform = transform
 
         self.source_images = sorted(self.images_dir.glob('*.*'))
@@ -105,9 +100,8 @@ class N2XDataset(Dataset):
 
         return (
             img_patch.view(1, *img_patch.shape),
-            img_patch.view(1, *img_patch.shape),
-            self.source_images[idx].name
+            self.source_images[idx].stem
         )
 
 
-export = [N2XPatchDataset, N2XDataset]
+export = [SelfSupervisedPatchDataset, SelfSupervisedDataset]

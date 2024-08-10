@@ -7,6 +7,12 @@ from torch.utils.data import Dataset
 
 
 class MNISTClassif(Dataset):
+    """Dataset to load MNIST dataset for image classification
+
+    :param dir_name: Directory where the MNIST data are downloaded locally
+    :param train: True to use train set, false to use test set
+    :param transform: Transformation to apply to the input images (data augmentation)
+    """
     def __init__(self, dir_name: str, train: bool = True, transform: Callable = None):
         super().__init__()
         self.mnist = MNIST(dir_name, train=train, download=True)
@@ -24,6 +30,12 @@ class MNISTClassif(Dataset):
 
 
 class MNISTAutoencoder(Dataset):
+    """Dataset to use the MNIST data for autoencoders
+
+    :param dir_name: Directory where the MNIST data are downloaded locally
+    :param train: True to use train set, false to use test set
+    :param transform: Transformation to apply to the input images (data augmentation)
+    """
     def __init__(self, dir_name: str, train: bool = True, transform: Callable = None):
         super().__init__()
         self.mnist = MNIST(dir_name, train=train, download=True)

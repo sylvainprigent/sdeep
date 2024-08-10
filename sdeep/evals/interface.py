@@ -12,10 +12,15 @@ class Eval(ABC):
         """Clear all the data in the evaluation class"""
 
     @abstractmethod
-    def eval_step(self, prediction: torch.Tensor, reference: torch.Tensor, idx: str, output_dir: Path = None):
+    def eval_step(self,
+                  prediction: torch.Tensor,
+                  reference: torch.Tensor,
+                  idx: str,
+                  output_dir: Path = None):
         """Evaluate the metric for one sample
 
-        This method is called by the workflow each time the model predict one sample at evaluation steps.
+        This method is called by the workflow each time the model predict one sample at evaluation
+        steps.
 
         :param prediction: Model prediction on the sample,
         :param reference: Reference results (ground truth)

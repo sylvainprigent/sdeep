@@ -12,25 +12,12 @@ class N2XDenoise(torch.nn.Module):
     :return: Loss tensor
     """
     def __init__(self):
-        super(N2XDenoise, self).__init__()
+        super().__init__()
 
     def forward(self, predict: torch.Tensor, target: torch.Tensor, mask: torch.Tensor):
         num = torch.sum((predict*mask - target*mask)**2)
         den = torch.sum(mask)
         return num/den
-
-
-class N2XDenoiseMSE(torch.nn.Module):
-    """MSE Loss with mask for Noise2Self denoising
-
-    :return: Loss tensor
-    """
-    def __init__(self):
-        super(N2XDenoiseMSE, self).__init__()
-        self.mse = torch.nn.MSELoss()
-
-    def forward(self, predict: torch.Tensor, target: torch.Tensor, mask: torch.Tensor):
-        return self.mse(predict*mask, target*mask)
 
 
 class N2XDecon(torch.nn.Module):
@@ -41,7 +28,7 @@ class N2XDecon(torch.nn.Module):
     """
     def __init__(self,
                  psf_file: Path, ):
-        super(N2XDecon, self).__init__()
+        super().__init__()
 
         self.__psf = torch.Tensor(imread(psf_file)).float()
         if self.__psf.ndim > 2:
@@ -65,4 +52,4 @@ class N2XDecon(torch.nn.Module):
         return num/den
 
 
-export = [N2XDenoise, N2XDecon, N2XDenoiseMSE]
+export = [N2XDenoise, N2XDecon]

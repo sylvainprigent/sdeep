@@ -247,6 +247,7 @@ class SWorkflow:
                   This dictionary must contain at least the val_loss entry
 
         """
+        print('')
         out_dir = Path(self.out_dir, "evals", f"epoch_{self.current_epoch}")
         out_dir.mkdir(parents=True)
 

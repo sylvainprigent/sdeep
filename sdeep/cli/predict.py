@@ -43,7 +43,7 @@ def main():
     # save the image
     if prediction.ndim == 1:
         if prediction.shape[0] == 1:
-            with open(args.output, 'w') as file:
+            with open(args.output, 'w', encoding='utf-8') as file:
                 file.write(f"{prediction.item()}")
         else:
             np.savetxt(args.output, prediction, delimiter=",")
