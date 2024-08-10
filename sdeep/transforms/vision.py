@@ -16,4 +16,16 @@ class VisionScale:
         return self.__transform(image)
 
 
-export = [VisionScale]
+class VisionCrop:
+    """Data augmentation for image restoration"""
+
+    def __init__(self, size: tuple[int, int]):
+        self.__transform = v2.Compose([
+            v2.CenterCrop(size)
+        ])
+
+    def __call__(self, image):
+        return self.__transform(image)
+
+
+export = [VisionScale, VisionCrop]

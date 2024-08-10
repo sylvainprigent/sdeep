@@ -47,29 +47,21 @@ class RestorationDataset(Dataset):
         return self.nb_images
 
     def __getitem__(self, idx):
+        source_patch = np.float32(io.imread(self.source_images[idx]))
+        target_patch = np.float32(io.imread(self.target_images[idx]))
 
-        img_source_np = \
-            np.float32(io.imread(self.source_images[idx]))
-
-        img_target_np = \
-            np.float32(io.imread(self.target_images[idx]))
+        # numpy to tensor
+        source_patch = torch.from_numpy(source_patch).view(1, *source_patch.shape).float()
+        target_patch = torch.from_numpy(target_patch).view(1, *target_patch.shape).float()
 
         # data augmentation
         if self.transform:
-            img_source_np = self.transform(img_source_np)
-            img_target_np = self.transform(img_target_np)
+            both_images = torch.cat((source_patch.unsqueeze(0), target_patch.unsqueeze(0)), 0)
+            transformed_images = self.transform(both_images)
+            source_patch = transformed_images[0, ...]
+            target_patch = transformed_images[1, ...]
 
-        # numpy continuous array
-        img_source_np = np.ascontiguousarray(img_source_np)
-        img_target_np = np.ascontiguousarray(img_target_np)
-
-        # to tensor
-        source_patch_tensor = torch.from_numpy(img_source_np).\
-            view(1, * img_source_np.shape).float()
-        target_patch_tensor = torch.from_numpy(img_target_np).\
-            view(1, *img_target_np.shape).float()
-
-        return source_patch_tensor, target_patch_tensor, self.source_images[idx].stem
+        return source_patch, target_patch, self.source_images[idx].stem
 
 
 class RestorationPatchDataset(Dataset):
@@ -131,20 +123,20 @@ class RestorationPatchDataset(Dataset):
             img_target_np[i * self.stride:i * self.stride + self.patch_size,
             j * self.stride:j * self.stride + self.patch_size]
 
+        # numpy to tensor
+        source_patch = torch.from_numpy(source_patch).view(1, *source_patch.shape).float()
+        target_patch = torch.from_numpy(target_patch).view(1, *target_patch.shape).float()
+
         # data augmentation
         if self.transform:
-            source_patch = self.transform(source_patch)
-            target_patch = self.transform(target_patch)
-
-        # numpy continuous array
-        source_patch = np.ascontiguousarray(source_patch)
-        target_patch = np.ascontiguousarray(target_patch)
+            both_images = torch.cat((source_patch.unsqueeze(0), target_patch.unsqueeze(0)), 0)
+            transformed_images = self.transform(both_images)
+            source_patch = transformed_images[0, ...]
+            target_patch = transformed_images[1, ...]
 
         # to tensor
-        return (torch.from_numpy(source_patch).view(1, *source_patch.shape)
-                .float(),
-                torch.from_numpy(target_patch).view(1, *target_patch.shape)
-                .float(),
+        return (source_patch,
+                target_patch,
                 str(idx)
                 )
 
@@ -216,19 +208,19 @@ class RestorationPatchDatasetLoad(Dataset):
             img_target_np[i * self.stride:i * self.stride + self.patch_size,
             j * self.stride:j * self.stride + self.patch_size]
 
+        # numpy to tensor
+        source_patch = torch.from_numpy(source_patch).view(1, *source_patch.shape).float()
+        target_patch = torch.from_numpy(target_patch).view(1, *target_patch.shape).float()
+
         # data augmentation
         if self.transform:
-            source_patch = self.transform(source_patch)
-            target_patch = self.transform(target_patch)
+            both_images = torch.cat((source_patch.unsqueeze(0), target_patch.unsqueeze(0)), 0)
+            transformed_images = self.transform(both_images)
+            source_patch = transformed_images[0, ...]
+            target_patch = transformed_images[1, ...]
 
-        # numpy continuous array
-        source_patch = np.ascontiguousarray(source_patch)
-        target_patch = np.ascontiguousarray(target_patch)
-
-        return (torch.from_numpy(source_patch).view(1, *source_patch.shape)
-                .float(),
-                torch.from_numpy(target_patch).view(1, *target_patch.shape)
-                .float(),
+        return (source_patch,
+                target_patch,
                 str(idx)
                 )
 

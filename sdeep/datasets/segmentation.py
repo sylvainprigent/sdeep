@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from torchvision.transforms import v2
 
 from skimage import io
 from skimage.measure import label
@@ -20,15 +21,14 @@ def patch_centroid(image: np.ndarray, patch_size: int) -> list[tuple[int, int]]:
     :return: The positions (center) of extracted patches
     """
     regions = []
-    for i in range(image.shape[0]):
-        if np.max(image[i, ...] > 1):
-            labels = np.unique(image[i, ...])
-            labels = labels[1:]  # remove 0
-            for label_ in labels:
-                regions += patch_centroid_single(
-                    np.uint8(image[i, ...] == label_), patch_size)
-        else:
-            regions += patch_centroid_single(image[i, ...], patch_size)
+    if np.max(image > 1):
+        labels = np.unique(image)
+        labels = labels[1:]  # remove 0
+        for label_ in labels:
+            regions += patch_centroid_single(
+                np.uint8(image == label_), patch_size)
+    else:
+        regions += patch_centroid_single(image, patch_size)
     return regions
 
 
@@ -66,9 +66,12 @@ def patch_grid(image: np.ndarray, patch_size: int, patch_overlap: 10) -> list[tu
     step = patch_size - patch_overlap
     start = int(patch_size/2)+1
     regions = []
-    for x in range(start, sx, step):
-        for y in range(start, sy, step):
-            regions.append((x, y))
+    for c_x in range(start, sx, step):
+        for c_y in range(start, sy, step):
+            if c_x - patch_size / 2 > 0 and c_y - patch_size / 2 > 0 \
+                    and c_x + patch_size / 2 < image.shape[0] \
+                    and c_y + patch_size / 2 < image.shape[1]:
+                regions.append((c_x, c_y))
     return regions
 
 
@@ -91,6 +94,32 @@ def extract_patches(image: np.ndarray,
     raise ValueError('Segmentation dataset patching strategy not found')
 
 
+def read_source_image(filename: Path) -> np.array:
+    """Read and shape a source image
+
+    :param filename: File containing the image,
+    :return: The image array
+    """
+    transform = v2.ToDtype(torch.float32, scale=True)
+    image = io.imread(filename).astype(float)
+    if image.ndim == 3:
+        image = np.moveaxis(image, -1, 0)
+    image = transform(image)
+    return image
+
+
+def read_target_image(filename: Path) -> np.array:
+    """Read and shape a target image
+
+    :param filename: File containing the image,
+    :return: The image array
+    """
+    image = io.imread(filename)
+    if image.ndim == 3:
+        image = np.ascontiguousarray(image[:, :, 0])
+    return image/255
+
+
 class SegmentationPatchDataset(Dataset):
     """Dataset to train from patches
 
@@ -106,19 +135,21 @@ class SegmentationPatchDataset(Dataset):
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
     def __init__(self,
-                 source_dir: Path,
-                 target_dir: Path,
+                 source_dir: str | Path,
+                 target_dir: str | Path,
                  patch_strategy: str = 'grid',
                  patch_size: int = 48,
                  patch_overlap: int = 8,
                  use_labels: bool = False,
+                 preload: bool = True,
                  transform: Callable = True,):
         super().__init__()
         self.device = None
-        self.source_dir = source_dir
-        self.target_dir = target_dir
+        self.source_dir = Path(source_dir)
+        self.target_dir = Path(target_dir)
         self.patch_size = patch_size
-        self.__use_labels = use_labels
+        self.preload = preload
+        self.use_labels = use_labels
         self.transform = transform
 
         self.source_images = sorted(self.source_dir.glob('*.*'))
@@ -129,9 +160,16 @@ class SegmentationPatchDataset(Dataset):
 
         self.nb_images = len(self.source_images)
 
+        if self.preload:
+            self.source_array = []
+            self.target_array = []
+            for i in range(0, self.nb_images):
+                self.source_array.append(read_source_image(self.source_images[i]))
+                self.target_array.append(read_target_image(self.target_images[i]))
+
         self.patches_info = []
         for i in range(0, self.nb_images):
-            image = io.imread(self.target_images[i])
+            image = read_target_image(self.target_images[i])
             image_patches = extract_patches(image, patch_strategy, patch_size, patch_overlap)
             for patch in image_patches:
                 self.patches_info.append([i, patch[0], patch[1]])
@@ -155,29 +193,46 @@ class SegmentationPatchDataset(Dataset):
         max_y = int(patch_cy + self.patch_size / 2)
 
         # load source patch
-        img_source_np = io.imread(self.source_images[image_id])
-        mini = np.min(img_source_np)
-        maxi = np.max(img_source_np)
-        img_source_np = (img_source_np-mini)/(maxi-mini)
-        source_patch = img_source_np[min_x:max_x, min_y:max_y]
+        if self.preload:
+            img_source_np = self.source_array[image_id]
+        else:
+            img_source_np = read_source_image(self.source_images[image_id])
 
-        img_target_np = io.imread(self.target_images[image_id])
-        target_patch = img_target_np[:, min_x:max_x, min_y:max_y]
-        if not self.__use_labels:
-            target_patch = target_patch / 255
+        if img_source_np.ndim > 2:
+            source_patch = img_source_np[:, min_x:max_x, min_y:max_y]
+        else:
+            source_patch = img_source_np[min_x:max_x, min_y:max_y]
 
-        # data augmentation
-        if self.transform:
-            source_patch = self.transform(source_patch)
-            target_patch = self.transform(target_patch)
+        # load target mask
+        if self.preload:
+            img_target_np = self.target_array[image_id]
+        else:
+            img_target_np = read_target_image(self.target_images[image_id])
 
-        # to tensor
-        if not self.__use_labels:
+        target_patch = img_target_np[min_x:max_x, min_y:max_y]
+        if not self.use_labels:
+            target_patch = target_patch
+
+        # source to tensor
+        source_patch = torch.from_numpy(source_patch).float()
+        if source_patch.ndim < 3:
+            source_patch = source_patch.view(1, *source_patch.shape)
+
+        # target to tensor
+        if not self.use_labels:
             target_tensor = torch.from_numpy(target_patch).float()
         else:
             target_tensor = torch.from_numpy(target_patch).long()
-        return (torch.from_numpy(source_patch).view(1, *source_patch.shape)
-                .float(),
+        target_tensor = target_tensor.view(1, *target_tensor.shape)
+
+        # data augmentation
+        if self.transform:
+            both_images = torch.cat((source_patch, target_tensor), 0)
+            transformed_images = self.transform(both_images)
+            source_patch = transformed_images[0:-1, ...]
+            target_tensor = transformed_images[-1].view(*target_tensor.shape)
+
+        return (source_patch,
                 target_tensor,
                 str(idx)
                 )
@@ -200,8 +255,8 @@ class SegmentationDataset(Dataset):
                  use_labels: bool = False,
                  transform: Callable = None):
         super().__init__()
-        self.source_dir = source_dir
-        self.target_dir = target_dir
+        self.source_dir = Path(source_dir)
+        self.target_dir = Path(target_dir)
         self.use_labels = use_labels
         self.transform = transform
 
@@ -218,25 +273,34 @@ class SegmentationDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        img_source_np = io.imread(self.source_images[idx])
-        img_target_np = io.imread(self.target_images[idx])
+        img_source_np = read_source_image(self.source_images[idx])
+        img_target_np = read_target_image(self.target_images[idx])
 
         if not self.use_labels:
-            img_target_np = img_target_np / 255
+            img_target_np = img_target_np
 
-        # data augmentation
-        if self.transform:
-            img_source_np = self.transform(img_source_np)
+        # source to tensor
+        source_tensor = torch.from_numpy(img_source_np).float()
+        if source_tensor.ndim < 3:
+            source_tensor = source_tensor.view(1, *source_tensor.shape)
 
         # to tensor
         if not self.use_labels:
-            target_tensor = torch.from_numpy(img_target_np).view(
-                *img_target_np.shape).float()
+            target_tensor = torch.from_numpy(img_target_np).float()
         else:
-            target_tensor = torch.from_numpy(img_target_np).view(
-                *img_target_np.shape).long()
-        return (torch.from_numpy(img_source_np).view(1, *img_source_np.shape)
-                .float(),
+            target_tensor = torch.from_numpy(img_target_np).long()
+        target_tensor = target_tensor.view(1, *target_tensor.shape)
+
+        # data augmentation
+        if self.transform:
+            both_images = torch.cat((source_tensor, target_tensor), 0)
+            transformed_images = self.transform(both_images)
+            source_tensor = transformed_images[0:-1, ...]
+            target_tensor = transformed_images[-1, ...].view(1,
+                                                             source_tensor.shape[-2],
+                                                             source_tensor.shape[-1])
+
+        return (source_tensor,
                 target_tensor,
                 self.source_images[idx].stem
                 )

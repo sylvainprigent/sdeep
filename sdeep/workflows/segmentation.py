@@ -38,9 +38,12 @@ class SegmentationWorkflow(SWorkflow):
                  train_batch_size: int,
                  val_batch_size: int,
                  epochs: int = 50,
+                 num_workers: int = 0,
+                 save_all: bool = False,
                  use_tiling=False):
         super().__init__(model, loss_fn, optimizer, train_dataset,
-                         val_dataset, evaluate, train_batch_size, val_batch_size, epochs)
+                         val_dataset, evaluate, train_batch_size, val_batch_size, epochs,
+                         num_workers, save_all)
         self.use_tiling = use_tiling
 
     def val_step(self):
@@ -89,7 +92,7 @@ class SegmentationWorkflow(SWorkflow):
                 with torch.no_grad():
                     prediction = self.model(x)
             for i, name in enumerate(names):
-                imsave(os.path.join(predictions_dir, name),
+                imsave(os.path.join(predictions_dir, f"{name}.tif"),
                        prediction[i, :, :].cpu().numpy())
 
 
