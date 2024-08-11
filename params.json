@@ -1,39 +1,38 @@
 {
-  "model": {
-    "name": "DeepFinder",
-    "n_channels_in": 1,
-    "n_channels_out": 2,
-    "n_feature_first": 32,
-    "use_sigmoid": true
-  },
-  "loss": {
-    "name": "BinaryDiceLoss",
-    "smooth": 1
-  },
-  "optim": {
-    "name": "Adam",
-    "lr": 0.001
-  },
-  "workflow": {
-    "name": "SegmentationWorkflow",
-    "epochs": 25,
-    "train_batch_size": 400,
-    "val_batch_size": 4,
-    "use_tiling": false
-  },
-  "train_dataset": {
-    "name": "SegmentationPatchDataset",
-    "source_dir": "C:\\workspace\\SMA\\training_set\\x_RI_train.npy",
-    "target_dir": "C:\\workspace\\SMA\\training_set\\y_GT_2class_train.npy",
-    "patch_size": 48,
-    "use_data_augmentation": true,
-    "use_labels": false
-  },
-  "val_dataset": {
-    "name": "SegmentationFileDataset",
-    "source_dir": "C:\\workspace\\SMA\\training_set\\test\\ri_dqb",
-    "target_dir": "C:\\workspace\\SMA\\training_set\\test\\gt_2class",
-    "use_data_augmentation": false,
-    "use_labels": false
+    "model": {
+      "name": "MNistClassifier"
+    },
+    "loss": {
+      "name": "CrossEntropyLoss"
+    },
+    "optim": {
+      "name": "Adam",
+      "lr": 0.001
+    },
+    "workflow": {
+      "name": "ClassificationWorkflow",
+      "epochs": 3,
+      "train_batch_size": 64,
+      "val_batch_size": 1000,
+      "save_all": true
+    },
+    "train_dataset": {
+      "name": "MNISTClassif",
+      "dir_name": "mnist_train",
+      "train": true
+    },
+    "train_transform": {
+      "name": "VisionScale"
+    },
+    "val_dataset": {
+      "name": "MNISTClassif",
+      "dir_name": "mnist_train",
+      "train": false
+    },
+    "val_transform": {
+      "name": "VisionScale"
+    },
+    "eval": {
+      "name": "EvalClassification"
+    }
   }
-}

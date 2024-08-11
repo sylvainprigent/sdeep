@@ -222,9 +222,6 @@ class SelfSupervisedWorkflow(SWorkflow):
                                     'remain_time': int(remains+0.5),
                                     'full_time': int(full_time+0.5)
                                     })
-            # if batch % 100 == 0:
-            #    loss, current = loss.item(), batch * len(X)
-            #    print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
         if count_step > 0:
             step_loss /= count_step

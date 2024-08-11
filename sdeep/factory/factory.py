@@ -3,6 +3,7 @@ from typing import Callable
 
 import os
 import importlib
+import pkgutil
 
 import torch
 from torch.utils.data import Dataset
@@ -29,6 +30,7 @@ class SFactory:
 
     def __register_modules(self, directory: str):
         modules = self.__find_modules(directory)
+        modules += self.__register_plugins(directory)
         modules_info = {}
         for name in modules:
             mod = importlib.import_module(name)
@@ -58,6 +60,28 @@ class SFactory:
                     module_name = str(module_path).split('.', maxsplit=1)[0]
                     modules.append(f"sdeep.{parent}.{module_name}")
         return modules
+
+    @staticmethod
+    def __register_plugins(submodule_name: str):
+        """Register compatible plugins installed in the environment to the factory
+
+        :param submodule_name: Name of the submodule (loss, model...)
+        """
+        discovered_plugins = {
+            name: name
+            for finder, name, is_pkg
+            in pkgutil.iter_modules()
+            if name.startswith("sdeep_")
+        }
+        modules_info = {}
+        for name in discovered_plugins:
+            mod = importlib.import_module(f'{name}.{submodule_name}')
+            service_id = name.replace("sdeep_", '')
+            if isinstance(mod.export, list):
+                modules_info[service_id] = mod.export[0]
+            else:
+                modules_info[service_id] = mod.export
+        return modules_info
 
     def get_model(self, name: str, args: dict[str, any]) -> torch.nn.Module:
         """Instantiate a model

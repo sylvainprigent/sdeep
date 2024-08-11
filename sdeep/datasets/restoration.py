@@ -79,12 +79,16 @@ class RestorationPatchDataset(Dataset):
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, source_dir, target_dir, patch_size=40, stride=10,
+    def __init__(self,
+                 source_dir: str | Path,
+                 target_dir: str | Path,
+                 patch_size: int = 40,
+                 stride: int = 10,
                  transform: Callable = None):
         super().__init__()
         self.device = None
-        self.source_dir = source_dir
-        self.target_dir = target_dir
+        self.source_dir = Path(source_dir)
+        self.target_dir = Path(target_dir)
         self.patch_size = patch_size
         self.stride = stride
         self.transform = transform
@@ -157,11 +161,15 @@ class RestorationPatchDatasetLoad(Dataset):
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, source_dir, target_dir, patch_size=40, stride=10,
+    def __init__(self,
+                 source_dir: str | Path,
+                 target_dir: str | Path,
+                 patch_size: int = 40,
+                 stride: int = 10,
                  transform: Callable = None):
         super().__init__()
-        self.source_dir = source_dir
-        self.target_dir = target_dir
+        self.source_dir = Path(source_dir)
+        self.target_dir = Path(target_dir)
         self.patch_size = patch_size
         self.stride = stride
         self.transform = transform
