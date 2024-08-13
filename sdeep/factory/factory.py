@@ -8,8 +8,7 @@ import pkgutil
 import torch
 from torch.utils.data import Dataset
 
-from sdeep.evals.interface import Eval
-
+from ..evals.interface import Eval
 from ..workflows import SWorkflow
 
 
@@ -27,6 +26,11 @@ class SFactory:
         self.__workflows = self.__register_modules("workflows")
         self.__evals = self.__register_modules("evals")
         self.__transforms = self.__register_modules("transforms")
+
+        print('check registered modules:')
+        for finder, name, is_pkg in pkgutil.iter_modules():
+            if name.startswith("sd_"):
+                print('found name=', name)
 
     def __register_modules(self, directory: str):
         modules = self.__find_modules(directory)
@@ -71,17 +75,16 @@ class SFactory:
             name: name
             for finder, name, is_pkg
             in pkgutil.iter_modules()
-            if name.startswith("sdeep_")
+            if name.startswith("sd_")
         }
-        modules_info = {}
+        modules = []
         for name in discovered_plugins:
-            mod = importlib.import_module(f'{name}.{submodule_name}')
-            service_id = name.replace("sdeep_", '')
-            if isinstance(mod.export, list):
-                modules_info[service_id] = mod.export[0]
-            else:
-                modules_info[service_id] = mod.export
-        return modules_info
+            try:
+                importlib.import_module(f'{name}.{submodule_name}')
+                modules.append(f'{name}.{submodule_name}')
+            except:
+                print(f"Warning: no implementation of {submodule_name} in {name}")
+        return modules
 
     def get_model(self, name: str, args: dict[str, any]) -> torch.nn.Module:
         """Instantiate a model

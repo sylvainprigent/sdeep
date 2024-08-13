@@ -1,5 +1,6 @@
 """Entry point for train CLI"""
 import os
+import sys
 import argparse
 
 from pathlib import Path
@@ -34,6 +35,9 @@ def main():
     parser.add_argument('-r', '--reuse',
                         help='True to reuse a previous checking point',
                         default='false')
+    parser.add_argument('-c', '--code',
+                        help='Add the source code repository to the path for plugin load',
+                        default='.')
 
     args = parser.parse_args()
 
@@ -41,6 +45,9 @@ def main():
         out_dir = args.save
     else:
         out_dir = get_subdir(args.save)
+
+    if args.code != "":
+        sys.path.append(args.code)
 
     params = SParametersReader.read(Path(args.parameters))
     SParametersReader.write(params, Path(out_dir) / "params.json")

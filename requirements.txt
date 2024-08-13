@@ -1,6 +1,5 @@
 numpy~=1.26.4
 torch~=2.3.1+cu121
-sdeep~=0.0.1
 scikit-image~=0.24.0
 torchvision~=0.18.1
 natsort~=8.4.0

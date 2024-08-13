@@ -48,6 +48,10 @@ class DRUNet(nn.Module):
                  nb: int = 4):
         super().__init__()
         self.receptive_field = 128
+        self.input_shape = (128, 128)
+
+        if len(nc) != 4:
+            raise ValueError('nc must be of size 4')
 
         self.m_head = nn.Conv2d(in_nc, nc[0], 3, stride=1, padding=1,
                                 bias=False)

@@ -19,6 +19,7 @@ class DeepFinder(nn.Module):
                  use_sigmoid: bool = False):
         super().__init__()
         self.receptive_field = 48
+        self.input_shape = (48, 48)
         self.__use_sigmoid = use_sigmoid
 
         n_feature_l1 = n_feature_first

@@ -7,6 +7,8 @@ class MNistClassifier(torch.nn.Module):
     """Basic classifier for the MNist dataset to tes and demo the classification framework"""
     def __init__(self):
         super().__init__()
+        self.receptive_field = 9
+        self.input_shape = (28, 28)
         self.conv1 = torch.nn.Conv2d(1, 10, kernel_size=5)
         self.conv2 = torch.nn.Conv2d(10, 20, kernel_size=5)
         self.conv2_drop = torch.nn.Dropout2d()
