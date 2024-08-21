@@ -10,7 +10,7 @@ from torch.utils.data import Dataset
 
 
 class SelfSupervisedPatchDataset(Dataset):
-    """Gray scaled image patch dataset for Self supervised learning
+    """Gray scaled image patched dataset for Self supervised learning
 
     :param images_dir: Directory containing the training images
     :param patch_size: Size of the squared training patches
@@ -68,7 +68,7 @@ class SelfSupervisedPatchDataset(Dataset):
 
 
 class SelfSupervisedDataset(Dataset):
-    """Gray scaled image patch dataset for Self supervised learning
+    """Gray scaled image dataset for Self supervised learning
 
     :param images_dir: Directory containing the training images
     :param transform: Transformation to images before model
