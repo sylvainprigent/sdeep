@@ -28,17 +28,17 @@ class SelfSupervisedPatchDataset(Dataset):
         self.stride = stride
         self.transform = transform
 
-        self.source_images = sorted(self.images_dir.glob('*.*'))
+        source_images = sorted(self.images_dir.glob('*.*'))
 
-        self.nb_images = len(self.source_images)
-        image = imread(self.source_images[0])
+        self.nb_images = len(source_images)
+        image = imread(source_images[0])
         self.n_patches = self.nb_images * ((image.shape[0] - patch_size) // stride) * \
                                           ((image.shape[1] - patch_size) // stride)
         print('num patches = ', self.n_patches)
 
         # Load all the images in a list
         self.images_data = []
-        for source in self.source_images:
+        for source in source_images:
             self.images_data.append(np.float32(imread(source)))
 
     def __len__(self):

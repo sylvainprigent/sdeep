@@ -9,18 +9,19 @@ from pathlib import Path
 from timeit import default_timer as timer
 
 import torch
-from torch.utils.data import Dataset
-from torch.utils.data import DataLoader
 
-from sdeep.utils import device, SProgressObservable, SDataLogger
-from sdeep.utils.progress_loggers import SProgressLogger
-from sdeep.utils.utils import seconds2str
-from sdeep.utils.io import save_model
+from ..utils import device, SProgressObservable, SDataLogger
+from ..utils.progress_loggers import SProgressLogger
+from ..utils.utils import seconds2str
+from ..utils.io import save_model
 
-from sdeep.evals import Eval
+from ..interfaces.workflow import SWorkflow
+from ..interfaces import SEval
+from ..interfaces import SDataset
+from ..interfaces import SModel
 
 
-class SWorkflow:
+class SWorkflowBase(SWorkflow):
     """Default workflow to train and predict a neural network
 
     :param model: Neural network model
@@ -35,42 +36,22 @@ class SWorkflow:
     :param num_workers: Number of workers for data loading
     :param save_all: Save model and run evals to all epoch
     """
-    # pylint: disable=too-many-instance-attributes
-    # pylint: disable=too-many-arguments
     def __init__(self,
-                 model: torch.nn.Module,
+                 model: SModel,
                  loss_fn: torch.nn.Module,
                  optimizer: torch.nn.Module,
-                 train_dataset: Dataset,
-                 val_dataset: Dataset,
-                 evaluate: Eval,
+                 train_dataset: SDataset,
+                 val_dataset: SDataset,
+                 evaluate: SEval,
                  train_batch_size: int,
                  val_batch_size: int,
                  epochs: int = 50,
                  num_workers: int = 0,
                  save_all: bool = False):
+        super().__init__(model, loss_fn, optimizer, train_dataset, val_dataset, evaluate,
+                         train_batch_size, val_batch_size, epochs, num_workers, save_all)
 
-        self.model = model.to(device())
-        self.loss_fn = loss_fn
-        self.optimizer = optimizer
-        self.evaluate = evaluate
-        self.train_data_loader = DataLoader(train_dataset,
-                                            batch_size=train_batch_size,
-                                            shuffle=True,
-                                            drop_last=True,
-                                            num_workers=num_workers)
-        self.val_data_loader = DataLoader(val_dataset,
-                                          batch_size=val_batch_size,
-                                          shuffle=False,
-                                          drop_last=False,
-                                          num_workers=0)
-        self.epochs = epochs
-        self.save_all = save_all
-
-        self.logger = None
-        self.progress = SProgressObservable()
-        self.progress.prefix = 'SWorkflow'
-
+        self.model_torch = model.model
         self.out_dir = ''
 
         self.current_epoch = 0
@@ -87,14 +68,10 @@ class SWorkflow:
         """
         self.logger = logger
 
-    def set_progress_observable(self, observable):
+    def set_progress_observable(self, observable: SProgressObservable):
         """The progress logger observable
 
-        Parameters
-        ----------
-        observable: SProgressObservable
-            The progress observable instance
-
+        :param observable: The progress observable instance
         """
         self.progress = observable
         self.progress.set_prefix(self.__class__.__name__)
@@ -113,11 +90,11 @@ class SWorkflow:
         This method can be used to log data or print console messages
         """
         num_parameters = sum(p.numel() for p in
-                             self.model.parameters() if p.requires_grad)
+                             self.model_torch.parameters() if p.requires_grad)
 
-        if hasattr(self.model, 'input_shape'):
-            dummy_input = torch.rand([1, 1, *self.model.input_shape]).to(device())
-            self.logger.add_graph(self.model, dummy_input)
+        if hasattr(self.model_torch, 'input_shape'):
+            dummy_input = torch.rand([1, *self.model_torch.input_shape]).to(device())
+            self.logger.add_graph(self.model_torch, dummy_input)
             self.logger.flush()
         self.progress.message(f"Using {device()} device")
         self.progress.message(f"Model number of parameters: "
@@ -137,12 +114,12 @@ class SWorkflow:
             out_dir = Path(self.out_dir, "evals", "final")
             out_dir.mkdir(parents=True)
 
-            self.model.eval()
+            self.model_torch.eval()
             self.evaluate.clear()
             with torch.no_grad():
                 for x, y, idx in self.val_data_loader:
                     x, y = x.to(device()), y.to(device())
-                    prediction = self.model(x)
+                    prediction = self.model_torch(x)
                     for i, id_ in enumerate(idx):
                         self.evaluate.eval_step(prediction[i, ...], y[i, ...], id_, out_dir)
 
@@ -163,9 +140,13 @@ class SWorkflow:
                                self.current_epoch)
         self.save_checkpoint()
         if self.save_all:
-            save_model(self.model,
+            transform_args = None
+            if self.val_dataset.transform is not None:
+                transform_args = self.val_dataset.transform.args
+            save_model(self.model_torch,
                        self.model.args,
-                       Path(self.out_dir, f'model_{self.current_epoch}.ml'))
+                       Path(self.out_dir, f'model_{self.current_epoch}.ml'),
+                       transform_args)
 
     def after_train_batch(self, data: dict[str, any]):
         """Instructions runs after one batch
@@ -187,9 +168,8 @@ class SWorkflow:
     def train_step(self):
         """Runs one step of training"""
         size = len(self.train_data_loader.dataset)
-        self.model.train()
+        self.model_torch.train()
         step_loss = 0
-        full_time = 0
         count_step = 0
         tic = timer()
         for batch, (x, y, _) in enumerate(self.train_data_loader):
@@ -197,7 +177,7 @@ class SWorkflow:
             x, y = x.to(device()), y.to(device())
 
             # Compute prediction error
-            prediction = self.model(x)
+            prediction = self.model_torch(x)
 
             loss = self.loss_fn(prediction, y)
             step_loss += loss
@@ -252,14 +232,14 @@ class SWorkflow:
         out_dir.mkdir(parents=True)
 
         num_batches = len(self.val_data_loader)
-        self.model.eval()
+        self.model_torch.eval()
         val_loss = 0
         if self.save_all and self.evaluate:
             self.evaluate.clear()
         with torch.no_grad():
             for x, y, idx in self.val_data_loader:
                 x, y = x.to(device()), y.to(device())
-                prediction = self.model(x)
+                prediction = self.model_torch(x)
                 val_loss += self.loss_fn(prediction, y).item()
                 if self.save_all and self.evaluate:
                     for i, id_ in enumerate(idx):
@@ -308,7 +288,7 @@ class SWorkflow:
         """
         torch.save({
                 'epoch': self.current_epoch,
-                'model_state_dict': self.model.state_dict(),
+                'model_state_dict': self.model_torch.state_dict(),
                 'optimizer_state_dict': self.optimizer.state_dict(),
                 'loss': self.current_loss,
             }, path)
@@ -316,7 +296,7 @@ class SWorkflow:
     def load_checkpoint(self, path):
         """Initialize the training for a checkpoint"""
         checkpoint = torch.load(path)
-        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.model_torch.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         self.current_epoch = checkpoint['epoch']
         self.current_loss = checkpoint['loss']
@@ -328,10 +308,10 @@ class SWorkflow:
         :return: the prediction
         """
         x_device = x.to(device()).unsqueeze(0).unsqueeze(0)
-        self.model.eval()
+        self.model_torch.eval()
         with torch.no_grad():
-            prediction = self.model(x_device)
+            prediction = self.model_torch(x_device)
         return prediction
 
 
-export = [SWorkflow]
+export = [SWorkflowBase]

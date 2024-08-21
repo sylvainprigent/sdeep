@@ -37,6 +37,7 @@ py-modules = ["sdeep"]
 
 [project.scripts]
 sdtrain = "sdeep.cli.train:main"
+sdpredict = "sdeep.cli.predict:main"
 
 
 [project.urls]

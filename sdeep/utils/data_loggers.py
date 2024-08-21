@@ -21,11 +21,11 @@ class SDataLogger:
         """
         raise NotImplementedError()
 
-    def add_graph(self, tag: str, model: torch.nn.Module):
+    def add_graph(self, model: torch.nn.Module, input_to_model: torch.Tensor):
         """Save a data scalar
 
-        :param tag: Name of the data
-        :param model: Value of the scalar
+        :param model: Model to generate the data
+        :param input_to_model: Input data to run the model
         """
         raise NotImplementedError()
 
@@ -53,13 +53,13 @@ class STensorboardLogger(SDataLogger):
         """
         self.writer.add_scalar(tag, value, step)
 
-    def add_graph(self, tag: str, model: torch.nn.Module):
+    def add_graph(self, model: torch.nn.Module, input_to_model: torch.Tensor):
         """Save a data scalar
 
-        :param tag: Name of the data
-        :param model: Value of the scalar
+        :param model: Model to generate the data
+        :param input_to_model: Input data to run the model
         """
-        self.writer.add_graph(tag, model)
+        self.writer.add_graph(model, input_to_model)
 
     def flush(self):
         """Flush the recorded data to disk"""

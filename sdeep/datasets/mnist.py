@@ -1,3 +1,4 @@
+"""Definitions of datasets to load MNIST data"""
 from typing import Callable
 import numpy as np
 import torch

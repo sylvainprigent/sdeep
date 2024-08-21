@@ -6,10 +6,10 @@ import torch
 
 from skimage.io import imsave
 
-from .interface import Eval
+from ..interfaces import SEval
 
 
-class EvalRestoration(Eval):
+class EvalRestoration(SEval):
     """Generate an evaluation of denoising results"""
     def __init__(self):
         self.__mse = None

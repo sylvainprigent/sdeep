@@ -31,7 +31,12 @@ class UNetConvBlock(nn.Module):
 
         self.relu = nn.ReLU()
 
-    def forward(self, inputs):
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+        """Apply the model
+
+        :param inputs: Data to process
+        :return: The processed data
+        """
         x = self.conv1(inputs)
         if self.use_batch_norm:
             x = self.bn1(x)
@@ -108,12 +113,11 @@ class UNetDecoderBlock(nn.Module):
 
 
 class UNet(nn.Module):
-    """Implementation of the UNet network
+    """Implementation of a UNet network
 
-    :param n_channels_in: Number of input channels (or features)
-    :param n_channels_out: Number of output channels (or features)
-    :param n_feature_first: Number of channels (or features) in the first
-                            convolution block
+    :param n_channels_in: Number of input channels (or features),
+    :param n_channels_out: Number of output channels (or features),
+    :param n_feature_first: Number of channels (or features) in the first convolution block,
     :param use_batch_norm: True to use the batch norm layers
     """
     def __init__(self,

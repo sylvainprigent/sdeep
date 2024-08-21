@@ -14,7 +14,12 @@ class BinaryDiceLoss(nn.Module):
         super().__init__()
         self.smooth = smooth
 
-    def forward(self, predict, target):
+    def forward(self, predict: torch.Tensor, target: torch.Tensor):
+        """Calculate forward loss
+
+        :param predict: tensor predicted by the model
+        :param target: Reference target tensor
+        """
         intersection = torch.sum(predict * target)
         den = torch.sum(predict*predict) + torch.sum(target*target)
 
@@ -39,8 +44,13 @@ class DiceLoss(nn.Module):
         self.ignore_index = ignore_index
 
     def forward(self, predict, target):
-        assert predict.shape == target.shape, \
-            'predict & target shape do not match'
+        """Calculate forward loss
+
+        :param predict: tensor predicted by the model
+        :param target: Reference target tensor
+        """
+        if predict.shape != target.shape:
+            raise ValueError('predict and target shape do not match')
         dice = BinaryDiceLoss(self.smooth)
         total_loss = 0
         predict = torch.sigmoid(predict)
@@ -49,12 +59,11 @@ class DiceLoss(nn.Module):
             if i != self.ignore_index:
                 dice_loss = dice(predict[:, i], target[:, i])
                 if self.weights is not None:
-                    assert self.weights.shape[0] == target.shape[1], \
-                        'Expect weights shape [{}], get[{}]'.format(
-                            target.shape[1], self.weights.shape[0])
+                    if self.weights.shape[0] != target.shape[1]:
+                        raise ValueError(f'Expect weights shape [{target.shape[1]}], '
+                                         f'get[{self.weights.shape[0]}]')
                     dice_loss *= self.weights[i]
                 total_loss += dice_loss
-
         return total_loss/target.shape[1]
 
 

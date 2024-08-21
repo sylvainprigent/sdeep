@@ -3,19 +3,17 @@ import os
 from skimage.io import imsave
 import torch
 
+from ..utils import TilePredict
+from ..utils import device
 
-from torch.utils.data import Dataset
+from ..interfaces import SModel
+from ..interfaces import SEval
+from ..interfaces import SDataset
 
-from sdeep.utils import device
-from sdeep.utils import TilePredict
-from sdeep.evals import Eval
-
-from .base import SWorkflow
+from .base import SWorkflowBase
 
 
-# pylint: disable=too-many-instance-attributes
-# pylint: disable=too-many-arguments
-class SegmentationWorkflow(SWorkflow):
+class SegmentationWorkflow(SWorkflowBase):
     """Workflow to train and predict a semantic segmentation neural network
 
     :param model: Neural network model
@@ -29,12 +27,12 @@ class SegmentationWorkflow(SWorkflow):
     :param use_tiling: use tiling or not for prediction
     """
     def __init__(self,
-                 model: torch.nn.Module,
+                 model: SModel,
                  loss_fn: torch.nn.Module,
                  optimizer: torch.nn.Module,
-                 train_dataset: Dataset,
-                 val_dataset: Dataset,
-                 evaluate: Eval,
+                 train_dataset: SDataset,
+                 val_dataset: SDataset,
+                 evaluate: SEval,
                  train_batch_size: int,
                  val_batch_size: int,
                  epochs: int = 50,
@@ -56,25 +54,25 @@ class SegmentationWorkflow(SWorkflow):
 
         """
         num_batches = len(self.val_data_loader)
-        self.model.eval()
+        self.model_torch.eval()
         # print('val step use tiling=', self.use_tiling)
         print("")
         val_loss = 0
         for x, y, _ in self.val_data_loader:
             x, y = x.to(device()), y.to(device())
             if self.use_tiling:
-                tile_predict = TilePredict(self.model)
+                tile_predict = TilePredict(self.model_torch)
                 prediction = tile_predict.run(x)
             else:
                 with torch.no_grad():
-                    prediction = self.model(x)
+                    prediction = self.model_torch(x)
             val_loss += self.loss_fn(prediction, y).item()
         val_loss /= num_batches
         return {'val_loss': val_loss}
 
     def after_train(self):
         """Instructions runs after the train."""
-        SWorkflow.after_train(self)
+        SWorkflowBase.after_train(self)
 
         # create the output dir
         predictions_dir = os.path.join(self.out_dir, 'predictions')
@@ -82,15 +80,15 @@ class SegmentationWorkflow(SWorkflow):
             os.mkdir(predictions_dir)
 
         # predict on all the test set
-        self.model.eval()
+        self.model_torch.eval()
         for x, _, names in self.val_data_loader:
             x = x.to(device())
             if self.use_tiling:
-                tile_predict = TilePredict(self.model)
+                tile_predict = TilePredict(self.model_torch)
                 prediction = tile_predict.run(x)
             else:
                 with torch.no_grad():
-                    prediction = self.model(x)
+                    prediction = self.model_torch(x)
             for i, name in enumerate(names):
                 imsave(os.path.join(predictions_dir, f"{name}.tif"),
                        prediction[i, :, :].cpu().numpy())

@@ -6,11 +6,11 @@ import pandas as pd
 import torch
 
 from sklearn.metrics import f1_score, precision_score, recall_score, confusion_matrix
-from .interface import Eval
+from ..interfaces import SEval
 
 
-class EvalClassification(Eval):
-    """Generate an evaluation of denoising results"""
+class EvalClassification(SEval):
+    """Generate an evaluation of classification results"""
     def __init__(self):
         self.__y_true = None
         self.__y_pred = None

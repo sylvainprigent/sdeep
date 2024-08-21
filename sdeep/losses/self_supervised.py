@@ -7,14 +7,14 @@ from sdeep.utils import device
 
 
 class N2XDenoise(torch.nn.Module):
-    """MSE Loss with mask for Noise2Void denoising
-
-    :return: Loss tensor
-    """
-    def __init__(self):
-        super().__init__()
-
+    """MSE Loss with mask for Noise2Void denoising"""
     def forward(self, predict: torch.Tensor, target: torch.Tensor, mask: torch.Tensor):
+        """Calculate forward loss
+
+        :param predict: tensor predicted by the model
+        :param target: Reference target tensor
+        :param mask: Mask to select pixels of interest
+        """
         num = torch.sum((predict*mask - target*mask)**2)
         den = torch.sum(mask)
         return num/den
@@ -45,6 +45,12 @@ class N2XDecon(torch.nn.Module):
             self.__conv_op.weight = torch.nn.Parameter(self.__psf)
 
     def forward(self, predict: torch.Tensor, target: torch.Tensor, mask: torch.Tensor):
+        """Calculate forward loss
+
+        :param predict: tensor predicted by the model
+        :param target: Reference target tensor
+        :param mask: Mask to select pixels of interest
+        """
         conv_img = self.__conv_op(predict)
 
         num = torch.sum((conv_img*mask - target*mask)**2)

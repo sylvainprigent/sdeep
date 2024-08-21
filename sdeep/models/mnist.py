@@ -15,7 +15,12 @@ class MNistClassifier(torch.nn.Module):
         self.fc1 = torch.nn.Linear(320, 50)
         self.fc2 = torch.nn.Linear(50, 10)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply the model
+
+        :param x: Data to process
+        :return: The processed data
+        """
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
         x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
         x = x.view(-1, 320)

@@ -3,18 +3,18 @@ from pathlib import Path
 from skimage.io import imsave
 
 import torch
-from torch.utils.data import Dataset
 
-from sdeep.utils import TilePredict
-from sdeep.utils import device
-from sdeep.evals import Eval
+from ..utils import TilePredict
+from ..utils import device
 
-from .base import SWorkflow
+from ..interfaces import SModel
+from ..interfaces import SEval
+from ..interfaces import SDataset
+
+from .base import SWorkflowBase
 
 
-# pylint: disable=too-many-instance-attributes
-# pylint: disable=too-many-arguments
-class RestorationWorkflow(SWorkflow):
+class RestorationWorkflow(SWorkflowBase):
     """Workflow to train and predict a restoration neural network
 
     :param model: Neural network model
@@ -29,12 +29,12 @@ class RestorationWorkflow(SWorkflow):
     :param use_tiling: use tiling or not for prediction
     """
     def __init__(self,
-                 model: torch.nn.Module,
+                 model: SModel,
                  loss_fn: torch.nn.Module,
                  optimizer: torch.nn.Module,
-                 train_dataset: Dataset,
-                 val_dataset: Dataset,
-                 evaluate: Eval,
+                 train_dataset: SDataset,
+                 val_dataset: SDataset,
+                 evaluate: SEval,
                  train_batch_size: int,
                  val_batch_size: int,
                  epochs: int = 50,
@@ -58,7 +58,7 @@ class RestorationWorkflow(SWorkflow):
         out_dir.mkdir(parents=True)
 
         num_batches = len(self.val_data_loader)
-        self.model.eval()
+        self.model_torch.eval()
         val_loss = 0
         if self.save_all:
             self.evaluate.clear()
@@ -66,11 +66,11 @@ class RestorationWorkflow(SWorkflow):
         for x, y, idx in self.val_data_loader:
             x, y = x.to(device()), y.to(device())
             if self.use_tiling:
-                tile_predict = TilePredict(self.model)
+                tile_predict = TilePredict(self.model_torch)
                 prediction = tile_predict.run(x)
             else:
                 with torch.no_grad():
-                    prediction = self.model(x)
+                    prediction = self.model_torch(x)
             val_loss += self.loss_fn(prediction, y).item()
             if self.save_all:
                 for i, id_ in enumerate(idx):
@@ -84,22 +84,22 @@ class RestorationWorkflow(SWorkflow):
 
     def after_train(self):
         """Instructions runs after the train."""
-        SWorkflow.after_train(self)
+        SWorkflowBase.after_train(self)
 
         # create the output dir
         predictions_dir = Path(self.out_dir, 'predictions')
         predictions_dir.mkdir(parents=True, exist_ok=True)
 
         # predict on all the test set
-        self.model.eval()
+        self.model_torch.eval()
         for x, _, names in self.val_data_loader:
             x = x.to(device())
             if self.use_tiling:
-                tile_predict = TilePredict(self.model)
+                tile_predict = TilePredict(self.model_torch)
                 prediction = tile_predict.run(x)
             else:
                 with torch.no_grad():
-                    prediction = self.model(x)
+                    prediction = self.model_torch(x)
             for i, name in enumerate(names):
                 imsave(Path(predictions_dir, name + ".tif"),
                        prediction[i, ...].cpu().numpy())

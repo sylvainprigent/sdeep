@@ -5,7 +5,9 @@ from torch import nn
 
 
 class DeepFinder(nn.Module):
-    """Implementation of the DRUNet network
+    """Implementation of a 2D version of the DeepFinder UNet model
+
+    `Publication <https://www.nature.com/articles/s41592-021-01275-4>`
 
     :param n_channels_in: Number of input channels
     :param n_channels_out: Number of output channels
@@ -19,7 +21,7 @@ class DeepFinder(nn.Module):
                  use_sigmoid: bool = False):
         super().__init__()
         self.receptive_field = 48
-        self.input_shape = (48, 48)
+        self.input_shape = (n_channels_in, 48, 48)
         self.__use_sigmoid = use_sigmoid
 
         n_feature_l1 = n_feature_first
@@ -99,7 +101,12 @@ class DeepFinder(nn.Module):
             kernel_size=1
         )
 
-    def forward(self, inputs):
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+        """Apply the model
+
+        :param inputs: Data to process
+        :return: The processed data
+        """
         x1 = self.block1(inputs)
         x = self.pool1(x1)
 

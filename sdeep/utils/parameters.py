@@ -70,6 +70,19 @@ class SParameters:
                              f'parameters')
         return self.__params[name]
 
+    @staticmethod
+    def to_dict(parameters: tuple[str, dict[str, any]]) -> dict[str, any] | None:
+        """Transform a module parameter tuple into a dictionary
+
+        :param parameters: Parameter tuple to convert
+        :return the parameters as a dict like in the JSON parameter file, or None if not a parameter
+        """
+        if not parameters:
+            return None
+        val_tr_params = parameters[1]
+        val_tr_params["name"] = parameters[0]
+        return val_tr_params
+
 
 class SParametersReader:
     """Read parameters from file"""

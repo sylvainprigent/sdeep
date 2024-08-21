@@ -7,18 +7,18 @@ class TverskyLoss(torch.nn.Module):
 
     :param alpha: alpha weight
     :param beta: beta weight
-    :param weights: classes weights
     """
-    def __init__(self,
-                 alpha: float = 0.5,
-                 beta: float = 0.5,
-                 weights: torch.Tensor = None):
+    def __init__(self, alpha: float = 0.5, beta: float = 0.5):
         super().__init__()
         self.__alpha = alpha
         self.__beta = beta
-        self.__weights = weights
 
     def forward(self, x, target):
+        """Calculate forward loss
+
+        :param x: tensor predicted by the model
+        :param target: Reference target tensor
+        """
         # per class Tversky
         ones = torch.ones(x.shape).to(self.__device)
         p_0 = target

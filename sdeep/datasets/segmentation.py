@@ -7,8 +7,7 @@ import torch
 from torchvision.transforms import v2
 
 from skimage import io
-from skimage.measure import label
-from skimage.measure import regionprops
+from skimage import measure
 
 from torch.utils.data import Dataset
 
@@ -39,10 +38,10 @@ def patch_centroid_single(image: np.ndarray, patch_size: int) -> list[tuple[int,
     :param patch_size: Dimension of square patch
     :return: The positions (center) of extracted patches
     """
-    label_image = label(image)
+    label_image = measure.label(image)
 
     regions = []
-    for region in regionprops(label_image):
+    for region in measure.regionprops(label_image):
         c_x, c_y = region.centroid
         c_x = int(c_x)
         c_y = int(c_y)
@@ -156,7 +155,7 @@ class SegmentationPatchDataset(Dataset):
         self.target_images = sorted(self.target_dir.glob('*.*'))
 
         if len(self.source_images) != len(self.target_images):
-            raise Exception("Source and target dirs are not the same length")
+            raise ValueError("Source and target dirs are not the same length")
 
         self.nb_images = len(self.source_images)
 
@@ -179,10 +178,9 @@ class SegmentationPatchDataset(Dataset):
     def __len__(self):
         return len(self.patches_info)
 
-    def __getitem__(self, idx):
-
-        # retrieve patch
-        patch_info = self.patches_info[idx]
+    def __extract_patch_info(self,
+                             patch_info: list[int]
+                             ) -> tuple[int, int, int, int, int]:
         image_id = patch_info[0]
         patch_cx = patch_info[1]
         patch_cy = patch_info[2]
@@ -191,6 +189,12 @@ class SegmentationPatchDataset(Dataset):
         max_x = int(patch_cx + self.patch_size / 2)
         min_y = int(patch_cy - self.patch_size / 2)
         max_y = int(patch_cy + self.patch_size / 2)
+        return int(image_id), min_x, max_x, min_y, max_y
+
+    def __getitem__(self, idx):
+
+        # retrieve patch
+        image_id, min_x, max_x, min_y, max_y = self.__extract_patch_info(self.patches_info[idx])
 
         # load source patch
         if self.preload:
@@ -210,8 +214,6 @@ class SegmentationPatchDataset(Dataset):
             img_target_np = read_target_image(self.target_images[image_id])
 
         target_patch = img_target_np[min_x:max_x, min_y:max_y]
-        if not self.use_labels:
-            target_patch = target_patch
 
         # source to tensor
         source_patch = torch.from_numpy(source_patch).float()
@@ -264,7 +266,7 @@ class SegmentationDataset(Dataset):
         self.target_images = sorted(self.target_dir.glob('*.*'))
 
         if len(self.source_images) != len(self.target_images):
-            raise Exception("Source and target dirs are not the same length")
+            raise ValueError("Source and target dirs are not the same length")
 
         self.nb_images = len(self.source_images)
 
@@ -275,9 +277,6 @@ class SegmentationDataset(Dataset):
 
         img_source_np = read_source_image(self.source_images[idx])
         img_target_np = read_target_image(self.target_images[idx])
-
-        if not self.use_labels:
-            img_target_np = img_target_np
 
         # source to tensor
         source_tensor = torch.from_numpy(img_source_np).float()

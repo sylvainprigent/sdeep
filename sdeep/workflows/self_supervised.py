@@ -6,13 +6,14 @@ import numpy as np
 from skimage.io import imsave
 
 import torch
-from torch.utils.data import Dataset
 
-from sdeep.utils import device
+from ..utils import device
 
-from sdeep.evals import Eval
+from ..interfaces import SModel
+from ..interfaces import SEval
+from ..interfaces import SDataset
 
-from .base import SWorkflow
+from .base import SWorkflowBase
 
 
 def generate_2d_points(shape: tuple[int, int], n_point: int) -> tuple[np.ndarray, np.ndarray]:
@@ -138,9 +139,7 @@ def generate_mask_n2s(image: torch.Tensor, ratio: float) -> tuple[torch.Tensor, 
     return image * (1 - mask), mask
 
 
-# pylint: disable=too-many-instance-attributes
-# pylint: disable=too-many-arguments
-class SelfSupervisedWorkflow(SWorkflow):
+class SelfSupervisedWorkflow(SWorkflowBase):
     """Workflow to train and predict a restoration neural network
 
     :param model: Neural network model
@@ -155,20 +154,19 @@ class SelfSupervisedWorkflow(SWorkflow):
     :param mask_type: Masking strategy (n2v, n2s)
     """
     def __init__(self,
-                 model: torch.nn.Module,
+                 model: SModel,
                  loss_fn: torch.nn.Module,
                  optimizer: torch.nn.Module,
-                 train_dataset: Dataset,
-                 val_dataset: Dataset,
-                 evaluate: Eval,
+                 train_dataset: SDataset,
+                 val_dataset: SDataset,
+                 evaluate: SEval,
                  train_batch_size: int,
                  val_batch_size: int,
                  epochs: int = 50,
                  num_workers: int = 0,
                  mask_type: str = "n2v"):
-        super().__init__(model, loss_fn, optimizer, train_dataset,
-                         val_dataset, evaluate, train_batch_size, val_batch_size, epochs,
-                         num_workers)
+        super().__init__(model, loss_fn, optimizer, train_dataset, val_dataset, evaluate,
+                         train_batch_size, val_batch_size, epochs, num_workers)
         self.mask_type = mask_type
         self.ratio = 0.1
 
@@ -190,7 +188,7 @@ class SelfSupervisedWorkflow(SWorkflow):
     def train_step(self):
         """Runs one step of training"""
         size = len(self.train_data_loader.dataset)
-        self.model.train()
+        self.model_torch.train()
         step_loss = 0
         count_step = 0
         tic = timer()
@@ -201,7 +199,7 @@ class SelfSupervisedWorkflow(SWorkflow):
             x, masked_x, mask = x.to(device()), masked_x.to(device()), mask.to(device())
 
             # Compute prediction error
-            prediction = self.model(masked_x)
+            prediction = self.model_torch(masked_x)
             loss = self.loss_fn(prediction, x, mask)
             step_loss += loss
 
@@ -238,7 +236,7 @@ class SelfSupervisedWorkflow(SWorkflow):
 
         """
         num_batches = len(self.val_data_loader)
-        self.model.eval()
+        self.model_torch.eval()
         print('')
         val_loss = 0
         for x, _ in self.val_data_loader:
@@ -247,14 +245,14 @@ class SelfSupervisedWorkflow(SWorkflow):
             x, masked_x, mask = x.to(device()), masked_x.to(device()), mask.to(device())
 
             with torch.no_grad():
-                prediction = self.model(masked_x)
+                prediction = self.model_torch(masked_x)
             val_loss += self.loss_fn(prediction, x, mask).item()
         val_loss /= num_batches
         return {'val_loss': val_loss}
 
     def after_train(self):
         """Instructions runs after the train."""
-        SWorkflow.after_train(self)
+        SWorkflowBase.after_train(self)
 
         # create the output dir
         predictions_dir = os.path.join(self.out_dir, 'predictions')
@@ -262,12 +260,12 @@ class SelfSupervisedWorkflow(SWorkflow):
             os.mkdir(predictions_dir)
 
         # predict on all the test set
-        self.model.eval()
+        self.model_torch.eval()
         for x, names in self.val_data_loader:
             x = x.to(device())
 
             with torch.no_grad():
-                prediction = self.model(x)
+                prediction = self.model_torch(x)
             for i, name in enumerate(names):
                 imsave(os.path.join(predictions_dir, name + ".tif"),
                        prediction[i, ...].cpu().numpy())

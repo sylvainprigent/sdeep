@@ -30,11 +30,25 @@ class AEConvBlock(nn.Module):
                 self.layer.append(nn.BatchNorm2d(n_channels_out))
             self.layer.append(nn.ReLU())
 
-    def forward(self, inputs):
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+        """Apply model
+
+        :param inputs: Data to process
+        :return: The data processed by the model
+        """
         return self.layer(inputs)
 
 
 class Autoencoder(nn.Module):
+    """Implementation of image autoencoder network
+
+    :param n_channels_in: Number of input channels,
+    :param n_channels_out: Number of output channels,
+    :param blocs_channels: Number of channels for each encoding/decoding blocs,
+    :param image_size: Size of the image to process (needed when using token),
+    :param use_token: True to add a fully connected embedding layer in the latent space,
+    :param layer_per_bloc: Number of convolution layer per bloc
+    """
     def __init__(self,
                  n_channels_in: int = 3,
                  n_channels_out: int = 3,
@@ -54,9 +68,9 @@ class Autoencoder(nn.Module):
               f'{encode_patch}) to {encode_size}')
 
         self.encoder = nn.Sequential()
-        for idx in range(len(blocs_channels)):
+        for idx, bloc_channel in enumerate(blocs_channels):
             n_in = n_channels_in if idx == 0 else blocs_channels[idx-1]
-            n_out = blocs_channels[idx]
+            n_out = bloc_channel
             self.encoder.append(AEConvBlock(n_in, n_out, layer_per_bloc, self.use_batch_norm))
             self.encoder.append(nn.MaxPool2d((2, 2)))
 
@@ -79,10 +93,11 @@ class Autoencoder(nn.Module):
         self.m_tail = nn.Conv2d(n_channels_out, n_channels_out, 3, stride=1, padding=1,
                                 bias=False)
 
-    def forward(self, x0):
+    def forward(self, x0: torch.Tensor) -> torch.Tensor:
         """torch forward method
 
         :param x0: Tensor to process
+        :return: the processed tensor
         """
         #print("x0.shape=", x0.shape)
         x_encode = self.encoder(x0)
@@ -103,7 +118,12 @@ class Autoencoder(nn.Module):
         #print("x_out.shape=", x.shape)
         return x
 
-    def encode(self, x0: torch.Tensor):
+    def encode(self, x0: torch.Tensor) -> torch.Tensor:
+        """Run only the encoder part of the autoencoder
+
+        :param x0: Tensor to process
+        :return: the data embedding
+        """
         x_encode = self.encoder(x0)
         if self.use_token:
             token = self.token_encode(x_encode)

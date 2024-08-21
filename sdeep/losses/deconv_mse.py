@@ -5,13 +5,13 @@ import torch
 from skimage.io import imread
 
 
-def hv_loss(img: torch.Tensor, weighting: float):
+def hv_loss(img: torch.Tensor, weighting: float) -> torch.Tensor:
     """Sparse Hessian regularization term
 
 
     :param img: Tensor of shape BCYX containing the estimated image
     :param weighting: Sparse weighting parameter in [0, 1]. 0 sparse, and 1 not sparse
-
+    :return the sparce hessian loss term for the batch
     """
     dxx2 = torch.square(-img[:, :, 2:, 1:-1] + 2 * img[:, :, 1:-1, 1:-1] - img[:, :, :-2, 1:-1])
     dyy2 = torch.square(-img[:, :, 1:-1, 2:] + 2 * img[:, :, 1:-1, 1:-1] - img[:, :, 1:-1, :-2])
@@ -22,7 +22,12 @@ def hv_loss(img: torch.Tensor, weighting: float):
     return torch.mean(h_v)
 
 
-def hessian(img: torch.Tensor):
+def hessian(img: torch.Tensor) -> torch.Tensor:
+    """Compute the Hessian norm on a 2D images batch
+
+    :param img: Image batch to process
+    :return: The batch norm of hessian
+    """
     dxx2 = torch.square(-img[:, :, 2:, 1:-1] + 2 * img[:, :, 1:-1, 1:-1] - img[:, :, :-2, 1:-1])
     dyy2 = torch.square(-img[:, :, 1:-1, 2:] + 2 * img[:, :, 1:-1, 1:-1] - img[:, :, 1:-1, :-2])
     dxy2 = torch.square(img[:, :, 2:, 2:] - img[:, :, 2:, 1:-1] - img[:, :, 1:-1, 2:] +
@@ -41,7 +46,7 @@ class DeconSpitfire(torch.nn.Module):
                  regularization: float = 1e-3,
                  weighting: float = 0.6
                  ):
-        super(DeconSpitfire, self).__init__()
+        super().__init__()
         self.psf_file = psf_file
         self.regularization = regularization
         self.weighting = weighting
@@ -88,7 +93,7 @@ class DeconMSEHessian(torch.nn.Module):
     def __init__(self,
                  psf_file: Path
                     ):
-        super(DeconMSEHessian, self).__init__()
+        super().__init__()
         self.psf_file = psf_file
 
         self.__psf = torch.Tensor(imread(psf_file)).float()

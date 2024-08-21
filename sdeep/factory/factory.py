@@ -1,15 +1,15 @@
 """Factory to instantiate modules"""
-from typing import Callable
-
 import os
 import importlib
 import pkgutil
 
 import torch
-from torch.utils.data import Dataset
 
-from ..evals.interface import Eval
-from ..workflows import SWorkflow
+from ..interfaces import STransform
+from ..interfaces import SDataset
+from ..interfaces import SModel
+from ..interfaces import SEval
+from ..interfaces.workflow import SWorkflow
 
 
 class SFactoryError(Exception):
@@ -27,11 +27,6 @@ class SFactory:
         self.__evals = self.__register_modules("evals")
         self.__transforms = self.__register_modules("transforms")
 
-        print('check registered modules:')
-        for finder, name, is_pkg in pkgutil.iter_modules():
-            if name.startswith("sd_"):
-                print('found name=', name)
-
     def __register_modules(self, directory: str):
         modules = self.__find_modules(directory)
         modules += self.__register_plugins(directory)
@@ -41,6 +36,16 @@ class SFactory:
             for value in mod.export:
                 modules_info[value.__name__] = value
         return modules_info
+
+    @staticmethod
+    def __is_module_name(module_path: str):
+        """Check if a module name is a good module candidate"""
+        return module_path.endswith(".py") and \
+            ("setup" not in module_path) and \
+            ("utils" not in module_path) and \
+            ("__init__" not in module_path) and \
+            (not module_path.startswith("interface")) and \
+            (not module_path.startswith("_"))
 
     @staticmethod
     def __find_modules(directory: str) -> list:
@@ -55,12 +60,7 @@ class SFactory:
         for parent in [directory]:
             path_ = os.path.join(path, parent)
             for module_path in os.listdir(path_):
-                if str(module_path).endswith(".py") and \
-                        'setup' not in module_path and \
-                        'utils' not in module_path and \
-                        '__init__' not in module_path and \
-                        not str(module_path).startswith("interface") and \
-                        not str(module_path).startswith("_"):
+                if SFactory.__is_module_name(module_path):
                     module_name = str(module_path).split('.', maxsplit=1)[0]
                     modules.append(f"sdeep.{parent}.{module_name}")
         return modules
@@ -82,11 +82,11 @@ class SFactory:
             try:
                 importlib.import_module(f'{name}.{submodule_name}')
                 modules.append(f'{name}.{submodule_name}')
-            except:
+            except ModuleNotFoundError:
                 print(f"Warning: no implementation of {submodule_name} in {name}")
         return modules
 
-    def get_model(self, name: str, args: dict[str, any]) -> torch.nn.Module:
+    def get_model(self, name: str, args: dict[str, any]) -> SModel:
         """Instantiate a model
 
         :param name: name of the model
@@ -95,8 +95,7 @@ class SFactory:
         """
         if name not in self.__models:
             raise SFactoryError(f'No implementation found for {name}')
-        model = self.__models[name](**args)
-        model.args = args
+        model = SModel(self.__models[name](**args), args)
         return model
 
     def get_loss(self, name: str, args: dict[str, any]) -> torch.nn.Module:
@@ -124,7 +123,11 @@ class SFactory:
             raise SFactoryError(f'No implementation found for {name}')
         return self.__optims[name](model.parameters(), **args)
 
-    def get_dataset(self, name: str, args: dict[str, any], transform: Callable = None) -> Dataset:
+    def get_dataset(self,
+                    name: str,
+                    args: dict[str, any],
+                    transform: STransform = None
+                    ) -> SDataset:
         """Instantiate a dataset
 
         :param name: name of the dataset
@@ -136,9 +139,10 @@ class SFactory:
             raise SFactoryError(f'No implementation found for {name}')
         if transform:
             args["transform"] = transform
-        return self.__datasets[name](**args)
+        dataset = SDataset(self.__datasets[name](**args), args, transform)
+        return dataset
 
-    def get_eval(self, name: str, args: dict[str, any]) -> Eval:
+    def get_eval(self, name: str, args: dict[str, any]) -> SEval:
         """Instantiate evaluation module
 
         :param name: name of the evaluation module
@@ -149,7 +153,7 @@ class SFactory:
             raise SFactoryError(f'No implementation found for {name}')
         return self.__evals[name](**args)
 
-    def get_transform(self, name: str, args: dict[str, any]) -> Dataset:
+    def get_transform(self, name: str, args: dict[str, any]) -> STransform:
         """Instantiate transformation module
 
         :param name: name of the evaluation module
@@ -158,18 +162,21 @@ class SFactory:
         """
         if name not in self.__transforms:
             raise SFactoryError(f'No implementation found for {name}')
-        return self.__transforms[name](**args)
+        args_ = args.copy()
+        args_['name'] = name
+        transform = STransform(self.__transforms[name](**args), args_)
+        return transform
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
     def get_workflow(self,
                      name: str,
-                     model: torch.nn.Module,
+                     model: SModel,
                      loss_fn: torch.nn.Module,
                      optim: torch.nn.Module,
-                     train_dataset: Dataset,
-                     val_dataset: Dataset,
-                     evaluate: Eval,
+                     train_dataset: SDataset,
+                     val_dataset: SDataset,
+                     evaluate: SEval,
                      args: dict[str, any]
                      ) -> SWorkflow:
         """Instantiate a dataset

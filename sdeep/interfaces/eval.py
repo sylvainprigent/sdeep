@@ -4,8 +4,16 @@ from pathlib import Path
 import torch
 
 
-class Eval(ABC):
-    """Interface for the evaluation modules"""
+class SEval(ABC):
+    """Interface for the evaluation modules
+
+    An evaluation module must implement three methods:
+
+    1. **clear**: to clear all the results between two epoch or two distinct evaluations
+    2. **eval_step**: to evaluate a pair (y_true, y_pred) of results. This method might store
+                      results for the global evaluation
+    3. **eval**: Generate all the global evaluation scores and files
+    """
 
     @abstractmethod
     def clear(self):

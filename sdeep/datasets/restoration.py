@@ -39,7 +39,7 @@ class RestorationDataset(Dataset):
         self.source_images = sorted(self.source_dir.glob('*.*'))
         self.target_images = sorted(self.target_dir.glob('*.*'))
         if len(self.source_images) != len(self.target_images):
-            raise Exception("Source and target dirs are not the same length")
+            raise ValueError("Source and target dirs are not the same length")
 
         self.nb_images = len(self.source_images)
 
@@ -96,7 +96,7 @@ class RestorationPatchDataset(Dataset):
         self.source_images = sorted(self.source_dir.glob('*.*'))
         self.target_images = sorted(self.target_dir.glob('*.*'))
         if len(self.source_images) != len(self.target_images):
-            raise Exception("Source and target dirs are not the same length")
+            raise ValueError("Source and target dirs are not the same length")
 
         self.nb_images = len(self.source_images)
         image = io.imread(self.source_images[0])
@@ -178,7 +178,7 @@ class RestorationPatchDatasetLoad(Dataset):
         self.target_images = sorted(self.target_dir.glob('*.*'))
 
         if len(self.source_images) != len(self.target_images):
-            raise Exception("Source and target dirs are not the same length")
+            raise ValueError("Source and target dirs are not the same length")
 
         self.nb_images = len(self.source_images)
         image = io.imread(self.source_images[0])

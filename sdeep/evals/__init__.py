@@ -1,7 +1,9 @@
 """Module to implement methods for evaluating models during validation steps or after training"""
 
-from .interface import Eval
+from .classification import EvalClassification
+from .restoration import EvalRestoration
 
 __all__ = [
-    "Eval"
+    "EvalClassification",
+    "EvalRestoration"
 ]
