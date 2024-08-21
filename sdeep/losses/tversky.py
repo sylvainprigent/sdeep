@@ -3,7 +3,7 @@ import torch
 
 
 class TverskyLoss(torch.nn.Module):
-    """Tversky loss implementation
+    """Tversky loss for instance segmentation
 
     :param alpha: alpha weight
     :param beta: beta weight

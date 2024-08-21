@@ -120,7 +120,7 @@ def read_target_image(filename: Path) -> np.array:
 
 
 class SegmentationPatchDataset(Dataset):
-    """Dataset to train from patches
+    """Dataset for image segmentation where images are partitioned into patches
 
     All the training images must be saved as individual images in source and
     target folders.

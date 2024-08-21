@@ -36,7 +36,7 @@ def hessian(img: torch.Tensor) -> torch.Tensor:
 
 
 class DeconSpitfire(torch.nn.Module):
-    """MSE LOSS with a (de)convolution filter
+    """MSE LOSS with a (de)convolution filter and Spitfire regularisation
 
     :param psf_file: File containing the PSF for deconvolution
     :return: Loss tensor
@@ -84,7 +84,7 @@ class DeconSpitfire(torch.nn.Module):
 
 
 class DeconMSEHessian(torch.nn.Module):
-    """MSE LOSS with a (de)convolution filter. Regularization with Hessian
+    """MSE LOSS with a (de)convolution filter and Hessian regularization
 
     :param psf_file: File containing the PSF for deconvolution
     :return: Loss tensor

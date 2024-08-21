@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class MNistClassifier(torch.nn.Module):
-    """Basic classifier for the MNist dataset to tes and demo the classification framework"""
+    """Basic classifier for the MNist dataset to test and demo the classification framework"""
     def __init__(self):
         super().__init__()
         self.receptive_field = 9

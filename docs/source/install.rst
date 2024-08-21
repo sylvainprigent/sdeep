@@ -7,7 +7,7 @@ Using pip
 ---------
 
 Releases are available in a GitHub repository. We recommend using virtual environment.
-Depending on the ``SDeep`` backend you are using you may need to install various packages.
+Depending on the GPU and ``PyTorch`` version you are using you may need to install various packages.
 For default local usage:
 
 .. code-block:: shell

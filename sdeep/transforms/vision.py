@@ -5,7 +5,7 @@ from torchvision.transforms import v2
 
 
 class VisionScale:
-    """Data augmentation for image restoration"""
+    """Scale images in [-1, 1]"""
 
     def __init__(self):
         self.__transform = v2.Compose([
@@ -17,8 +17,10 @@ class VisionScale:
 
 
 class VisionCrop:
-    """Data augmentation for image restoration"""
-
+    """Crop the images at the center
+    
+    :param size: Size of the croped region
+    """
     def __init__(self, size: tuple[int, int]):
         self.__transform = v2.Compose([
             v2.CenterCrop(size)

@@ -5,7 +5,7 @@ from sdeep.models.deep_finder import DeepFinder
 def test_unet_receptive_field():
     model = DeepFinder()
     assert model.receptive_field == 48
-    assert model.input_shape == (48, 48)
+    assert model.input_shape == (1, 48, 48)
 
 
 def test_deep_finder_gray():

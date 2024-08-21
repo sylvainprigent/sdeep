@@ -4,7 +4,7 @@ from torch import nn
 
 
 class BinaryDiceLoss(nn.Module):
-    """Dice loss of binary class
+    """Dice loss for binary classification
 
     :param smooth: A float number to smooth loss, and avoid NaN error
     :return: Loss tensor

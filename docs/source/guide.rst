@@ -4,28 +4,28 @@ Guide
 Design
 ------
 
-`SDeep` is designed to run deep learning trainings locally with a single command line and deep
-learning components implemented as independent modules.
+`SDeep` is designed to run deep learning trainings locally using a single command line assembling deep
+learning components as independent modules.
 
 The scheme bellow shows the general architecture of a model training with `SDeep`. The core
 component is the *Workflow* that own the training loop and all the training I/O. The *Workflow* is
 feed with the model training components:
 
 1. **Transform**: is a module to transform the input data before training. Transformation here means
-   mainly data scaling and data augmentation transformations
+   data scaling and data augmentation transformations
 
-2. **Dataset**: is component to read and iterate training and validation data from storage. It is
+2. **Dataset**: is a component to read training and validation data from storage. It is
    implemented using the `PyTorch` `torch.utils.data.Dataset`
 
 3. **Model**: is the neural network implemented using the `PyTorch` `torch.nn.Module`
 
-4. **Loss**: is loss function to be minimized. It is implemented using the the `PyTorch` loss module
+4. **Loss**: is the loss function to be minimized. It is implemented using the the `PyTorch` loss module
 
-5. **Optim**: is the gradient back-propagation method to use for the training. It is again based on
+5. **Optim**: is the gradient back-propagation method for the training. It is again based on
    `PyTorch` definition from `PyTorch` `Optimizer`
 
-6. **Eval**: is a module introduced in `SDeep` to measure and save result quality metrics during and
-   the after the training.
+6. **Eval**: is a module introduced in `SDeep` to measure and save results quality during and
+    after the training.
 
 
 .. image:: images/caroussel/3.png
@@ -35,7 +35,7 @@ feed with the model training components:
 How to
 ------
 
-This section show a basic introduction on how to use the `SDeep` framework. Please refer to the API
+This section shows a basic introduction on how to use the `SDeep` framework. Please refer to the API
 documentation for more advanced features.
 
 Run a training
@@ -90,36 +90,36 @@ Bellow an example of parameter file for the MNIST classification *Hello world* e
     }
 
 The parameter file is in JSON format and is self explanatory. Each root object is an instance of a
-module needed by the workflow for training. The *Workflow* we use here is *ClassificationWorkflow*
+module needed by the framework for training. The *Workflow* we use here is *ClassificationWorkflow*
 which is a training workflow optimised for image classification. We set workflow parameters like
 the number of epoch and the option to save all the models and eval results for each epoch. The model
-is *MNistClassifier* which is a small image classification network with 2 convolution layers with
+is *MNistClassifier* which is a small image classification network with 2 convolution layers and
 max-pooling for feature extraction followed by fully connected layers for classification. The loss
 function is the *CrossEntropyLoss*, the optimizer is *Adam* with a step of *0.001*. For the
 datasets, with instantiate the MNIST dataset in *train* mode for the training *train_dataset* and in
 test mode for the validation *val_dataset*. Both datasets take at input the *VisionScale* transform
 that scale the image intensities in [-1, 1]. The last module is the *eval* module. Here we chose the
 *EvalClassification* module that compute precision, recall, F1 score and the confusion matrix on the
-validation set and save the result in the training report directory
+validation set and save the result in the training output directory.
 
 After the training, all the results are saved in the *run* directory by default.
 
 .. note::
-    The output dir can be changed in the `sdtrain` command line with the option -s
+    The output dir can be changed in the `sdtrain` command line with the option *-s*
 
-This directory contains:
+This output directory contains:
 
 1. **checkpoint.ckpt**: a backup of the last epoch to restart from it if needed. It can be used with
-   the `-r` option of the `sdtrain` command line
+   the `-r` option of the `sdtrain` command line,
 
 2. **log.txt**: a log file with all the training verbose information. It is similar to what is writen
-   in the console during training
+   in the console during training,
 
 3. **events.out.tfevents.\***: the tensorboard file that save the training curves and other
-   monitoring data depending on the *Workflow*
+   monitoring data depending on the *Workflow*,
 
 4. **eval**: a directory containing all the model evaluation outputs. For exemple, the
-   *EvalClassification* module save 2 files: *confusion_matrix.csv* and *scores.csv*
+   *EvalClassification* module save 2 files: *confusion_matrix.csv* and *scores.csv*,
 
 6. **predictions**: depending on the workflow, a prediction directory contains the predictions of
    the model on the evaluation dataset.
@@ -137,16 +137,18 @@ To run a prediction from a model generated by a `SDeep` training, we just need t
 
 or on a directory
 
+.. code-block:: shell
+
     sdpredict -i input_dir/ -o output_dir/ -m model.ml --e ".tif"
 
 
 There is no need to transform the data before calling the ``sdpredict`` command because the command
-will automatically apply the validation set transform used during the training for prediction.
+will automatically apply the validation set transform used during the training.
 
 Create custom modules
 ~~~~~~~~~~~~~~~~~~~~~
 
-The main goal of the `SDeep` framework is to ba able to create custom models, loss or even
+The main goal of the `SDeep` framework is to be able to create custom models, loss or even
 workflows. In the following we are going step by step in how to create a custom module for training
 a model.
 
@@ -154,10 +156,10 @@ First, we need a directory where we will create a python module that follows the
 architecture.
 Basically, the `SDeep` command line tool will search for modules who's name starts with `sd_` and
 contains submodules names as the `SDeep` modules (datasets, evals, losses, models, optims,
-transforms, workflows). All the modules are not mandatory, and you can implement only the one you
+transforms, workflows). All the modules are not mandatory, and we can implement only the one we
 need.
 
-Thus two architecture of your python module are possible. If we need to implement only one module
+Thus two architecture of the python module are possible. If we need to implement only one module
 per component, we can just create a module file per component:
 
 
@@ -172,7 +174,7 @@ per component, we can just create a module file per component:
 |   \|-- workflows.py
 
 
-of if we plan to implement multiple modules per components, it may be more clear to separate them
+If we plan to implement multiple modules per components, it may be more clear to separate them
 into sub modules using directories:
 
 | my_project
@@ -188,7 +190,7 @@ into sub modules using directories:
 |   \|-- transforms.py
 |   \|-- workflows.py
 
-For `SDeep` to be able to find instantiate dynamically the modules, we need to declare them using
+Finaly, to enable `SDeep` to instantiate dynamically the modules, we need to declare them using
 the export variable. This means that in each module file, their should be a line similar to
 
 .. code-block:: python
@@ -205,17 +207,25 @@ We first create a directory for our python module:
 |   \|-- datasets.py
 | params.json
 
-The `__init__.py` file can stay empty, it only declare to python that it is a python module. In the
+The `__init__.py` file can stay empty, it only declare the python module. In the
 `dataset.py` file we can create our dataset as a regular `PyTorch` dataset
 
 .. code-block:: python
 
-    class MNISTDenoising(Dataset):
-        """Dataset to use the MNIST data for denoising learning
+    from typing import Callable
+    import numpy as np
+    import torch
+    from torchvision.datasets import MNIST
 
-        :param dir_name: Directory where the MNIST data are downloaded locally
-        :param noise_sigma: Standard deviation of the random gaussian noise to add
-        :param train: True to use train set, false to use test set
+    from torch.utils.data import Dataset
+
+
+    class MNISTDenoising(Dataset):
+        """Dataset to use the MNIST data for image denoising
+
+        :param dir_name: Directory where the MNIST data are downloaded locally,
+        :param noise_sigma: Standard deviation of the random gaussian noise to add,
+        :param train: True to use train set, false to use test set,
         :param transform: Transformation to apply to the input images (data augmentation)
         """
         def __init__(self,
@@ -293,7 +303,7 @@ The we can create a `params.json` file with the training parameters:
         }
       }
 
-Here we didn't use data transform for simplification. We can then run the training using the
+Here we didn't use data transform for simplification. We can then run the training with the
 `SDeep` train command:
 
 .. code-block:: shell
@@ -304,9 +314,8 @@ Here we didn't use data transform for simplification. We can then run the traini
 
 .. note::
     If `SDeep` does not find your module, you can either install it in the same env as `SDeep` or
-    use the option `-c` to declare your directory to SDeep:
+    use the option *-c* to declare your directory to SDeep:
 
     .. code-block:: shell
 
         sdtrain -p params.json -c /path/to/my_denoising
-

@@ -4,7 +4,7 @@ from torchvision.transforms import v2
 
 
 class FlipAugmentation:
-    """Data augmentation for image restoration"""
+    """Data augmentation by flipping images"""
     def __init__(self):
         self.__transform = v2.Compose([
             v2.RandomHorizontalFlip(p=0.5),

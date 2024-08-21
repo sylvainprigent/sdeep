@@ -9,7 +9,7 @@ and :class:`Eval <sdeep.interfaces.SEval>`
    :widths: 25 75
 
    * - `Transform <https://docs.python.org/3/reference/datamodel.html#emulating-callable-objects>`_
-     - Callable to transform a numpy array into another numpy array of same shape
+     - Callable to transform a tensor into another tensor of same shape
    * - `Dataset <https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset>`_
      - Read and apply transform to data for training or validation
    * - `Module <https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module>`_
@@ -21,7 +21,7 @@ and :class:`Eval <sdeep.interfaces.SEval>`
    * - :class:`SEval <sdeep.interfaces.SEval>`
      - Implements the evaluation metrics and write evaluation output files
    * - :class:`SWorkflow <sdeep.interfaces.workflow.SWorkflow>`
-     - Implement the training strategy
+     - Implements the training strategy
 
 Interfaces
 ----------
@@ -91,7 +91,7 @@ Losses
 ------
 
 Losses listed in the documentation are the one implemented in `SDeep`. Any `PyTorch` loss can be
-made accessible to the `SDeep` framework using the ``export=[MyLoss]`` in the loss losses modules.
+made accessible to the `SDeep` framework using the ``export=[MyLoss]`` in the losses module.
 By default `PyTorch` available losses are:
 
 - `MSELoss`

@@ -17,7 +17,7 @@ from torch.utils.data import Dataset
 
 
 class RestorationDataset(Dataset):
-    """Dataset to train from full images
+    """Dataset for image restoration from full images
 
     All the training images must be saved as individual images in source and
     target folders.
@@ -65,7 +65,7 @@ class RestorationDataset(Dataset):
 
 
 class RestorationPatchDataset(Dataset):
-    """Dataset to train from patches
+    """Dataset for image restoration using patches
 
     All the training images must be saved as individual images in source and
     target folders.
@@ -146,7 +146,7 @@ class RestorationPatchDataset(Dataset):
 
 
 class RestorationPatchDatasetLoad(Dataset):
-    """Dataset to train from patches
+    """Dataset for image restoration using patches preloaded in memory
 
     All the training images must be saved as individual images in source and
     target folders.
