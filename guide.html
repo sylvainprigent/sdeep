@@ -1,0 +1,769 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Guide &#8212; SciXTracer 0.0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=c01ab6dc" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=e645c8fa"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'guide';</script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Modules" href="modules.html" />
+    <link rel="prev" title="Install" href="install.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">SciXTracer 0.0.1 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="modules.html">Modules</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.SDataset.html">sdeep.interfaces.SDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.SEval.html">sdeep.interfaces.SEval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.SModel.html">sdeep.interfaces.SModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.STransform.html">sdeep.interfaces.STransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.SWorkflow.html">sdeep.interfaces.SWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.SWorkflowBase.html">sdeep.workflows.SWorkflowBase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.ClassificationWorkflow.html">sdeep.workflows.ClassificationWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.RestorationWorkflow.html">sdeep.workflows.RestorationWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.SegmentationWorkflow.html">sdeep.workflows.SegmentationWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.SelfSupervisedWorkflow.html">sdeep.workflows.SelfSupervisedWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.evals.EvalClassification.html">sdeep.evals.EvalClassification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.evals.EvalRestoration.html">sdeep.evals.EvalRestoration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.Autoencoder.html">sdeep.models.Autoencoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.DnCNN.html">sdeep.models.DnCNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.DeepFinder.html">sdeep.models.DeepFinder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.DRUNet.html">sdeep.models.DRUNet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.MNistClassifier.html">sdeep.models.MNistClassifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.UNet.html">sdeep.models.UNet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.DeconMSEHessian.html">sdeep.losses.DeconMSEHessian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.DeconSpitfire.html">sdeep.losses.DeconSpitfire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.DiceLoss.html">sdeep.losses.DiceLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.BinaryDiceLoss.html">sdeep.losses.BinaryDiceLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.VGGL1PerceptualLoss.html">sdeep.losses.VGGL1PerceptualLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.N2XDenoise.html">sdeep.losses.N2XDenoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.N2XDecon.html">sdeep.losses.N2XDecon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.TverskyLoss.html">sdeep.losses.TverskyLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.MNISTClassif.html">sdeep.datasets.MNISTClassif</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.MNISTAutoencoder.html">sdeep.datasets.MNISTAutoencoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.RestorationDataset.html">sdeep.datasets.RestorationDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.RestorationPatchDataset.html">sdeep.datasets.RestorationPatchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.RestorationPatchDatasetLoad.html">sdeep.datasets.RestorationPatchDatasetLoad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.SegmentationDataset.html">sdeep.datasets.SegmentationDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.SegmentationPatchDataset.html">sdeep.datasets.SegmentationPatchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.SelfSupervisedDataset.html">sdeep.datasets.SelfSupervisedDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.SelfSupervisedPatchDataset.html">sdeep.datasets.SelfSupervisedPatchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.transforms.FlipAugmentation.html">sdeep.transforms.FlipAugmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.transforms.RestorationAugmentation.html">sdeep.transforms.RestorationAugmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.transforms.VisionScale.html">sdeep.transforms.VisionScale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.transforms.VisionCrop.html">sdeep.transforms.VisionCrop</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/guide.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Guide</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design">Design</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to">How to</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-a-training">Run a training</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-a-prediction">Run a prediction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-custom-modules">Create custom modules</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="guide">
+<h1>Guide<a class="headerlink" href="#guide" title="Link to this heading">#</a></h1>
+<section id="design">
+<h2>Design<a class="headerlink" href="#design" title="Link to this heading">#</a></h2>
+<p><cite>SDeep</cite> is designed to run deep learning trainings locally using a single command line assembling deep
+learning components as independent modules.</p>
+<p>The scheme bellow shows the general architecture of a model training with <cite>SDeep</cite>. The core
+component is the <em>Workflow</em> that own the training loop and all the training I/O. The <em>Workflow</em> is
+feed with the model training components:</p>
+<ol class="arabic simple">
+<li><p><strong>Transform</strong>: is a module to transform the input data before training. Transformation here means
+data scaling and data augmentation transformations</p></li>
+<li><p><strong>Dataset</strong>: is a component to read training and validation data from storage. It is
+implemented using the <cite>PyTorch</cite> <cite>torch.utils.data.Dataset</cite></p></li>
+<li><p><strong>Model</strong>: is the neural network implemented using the <cite>PyTorch</cite> <cite>torch.nn.Module</cite></p></li>
+<li><p><strong>Loss</strong>: is the loss function to be minimized. It is implemented using the the <cite>PyTorch</cite> loss module</p></li>
+<li><p><strong>Optim</strong>: is the gradient back-propagation method for the training. It is again based on
+<cite>PyTorch</cite> definition from <cite>PyTorch</cite> <cite>Optimizer</cite></p></li>
+<li><dl class="simple">
+<dt><strong>Eval</strong>: is a module introduced in <cite>SDeep</cite> to measure and save results quality during and</dt><dd><p>after the training.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<a class="reference internal image-reference" href="_images/3.png"><img alt="Alternative text" src="_images/3.png" style="width: 600px;" />
+</a>
+</section>
+<section id="how-to">
+<h2>How to<a class="headerlink" href="#how-to" title="Link to this heading">#</a></h2>
+<p>This section shows a basic introduction on how to use the <cite>SDeep</cite> framework. Please refer to the API
+documentation for more advanced features.</p>
+<section id="run-a-training">
+<h3>Run a training<a class="headerlink" href="#run-a-training" title="Link to this heading">#</a></h3>
+<p>The simplest use case is when all the needed modules for training are already available in <cite>SDeep</cite>.
+Wen then just need to run the <cite>sdtrain</cite> command line with a parameter file. The parameter file is
+a json file that define the training workflow and all the input modules needed for the training
+(Dataset, Model, Optim, …)</p>
+<p>Bellow an example of parameter file for the MNIST classification <em>Hello world</em> example:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">     </span><span class="s2">&quot;model&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;MNistClassifier&quot;</span>
+<span class="w">     </span><span class="p">},</span>
+<span class="w">     </span><span class="s2">&quot;loss&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;CrossEntropyLoss&quot;</span>
+<span class="w">     </span><span class="p">},</span>
+<span class="w">     </span><span class="s2">&quot;optim&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Adam&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;lr&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">0.001</span>
+<span class="w">     </span><span class="p">},</span>
+<span class="w">     </span><span class="s2">&quot;workflow&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ClassificationWorkflow&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;epochs&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">3</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;train_batch_size&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">64</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;val_batch_size&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1000</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;save_all&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">     </span><span class="p">},</span>
+<span class="w">     </span><span class="s2">&quot;train_dataset&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;MNISTClassif&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;dir_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;mnist_train&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;train&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">     </span><span class="p">},</span>
+<span class="w">     </span><span class="s2">&quot;train_transform&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;VisionScale&quot;</span>
+<span class="w">     </span><span class="p">},</span>
+<span class="w">     </span><span class="s2">&quot;val_dataset&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;MNISTClassif&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;dir_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;mnist_train&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;train&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">     </span><span class="p">},</span>
+<span class="w">     </span><span class="s2">&quot;val_transform&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;VisionScale&quot;</span>
+<span class="w">     </span><span class="p">},</span>
+<span class="w">     </span><span class="s2">&quot;eval&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;EvalClassification&quot;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The parameter file is in JSON format and is self explanatory. Each root object is an instance of a
+module needed by the framework for training. The <em>Workflow</em> we use here is <em>ClassificationWorkflow</em>
+which is a training workflow optimised for image classification. We set workflow parameters like
+the number of epoch and the option to save all the models and eval results for each epoch. The model
+is <em>MNistClassifier</em> which is a small image classification network with 2 convolution layers and
+max-pooling for feature extraction followed by fully connected layers for classification. The loss
+function is the <em>CrossEntropyLoss</em>, the optimizer is <em>Adam</em> with a step of <em>0.001</em>. For the
+datasets, with instantiate the MNIST dataset in <em>train</em> mode for the training <em>train_dataset</em> and in
+test mode for the validation <em>val_dataset</em>. Both datasets take at input the <em>VisionScale</em> transform
+that scale the image intensities in [-1, 1]. The last module is the <em>eval</em> module. Here we chose the
+<em>EvalClassification</em> module that compute precision, recall, F1 score and the confusion matrix on the
+validation set and save the result in the training output directory.</p>
+<p>After the training, all the results are saved in the <em>run</em> directory by default.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The output dir can be changed in the <cite>sdtrain</cite> command line with the option <em>-s</em></p>
+</div>
+<p>This output directory contains:</p>
+<ol class="arabic simple">
+<li><p><strong>checkpoint.ckpt</strong>: a backup of the last epoch to restart from it if needed. It can be used with
+the <cite>-r</cite> option of the <cite>sdtrain</cite> command line,</p></li>
+<li><p><strong>log.txt</strong>: a log file with all the training verbose information. It is similar to what is writen
+in the console during training,</p></li>
+<li><p><strong>events.out.tfevents.*</strong>: the tensorboard file that save the training curves and other
+monitoring data depending on the <em>Workflow</em>,</p></li>
+<li><p><strong>eval</strong>: a directory containing all the model evaluation outputs. For exemple, the
+<em>EvalClassification</em> module save 2 files: <em>confusion_matrix.csv</em> and <em>scores.csv</em>,</p></li>
+</ol>
+<ol class="arabic simple" start="6">
+<li><p><strong>predictions</strong>: depending on the workflow, a prediction directory contains the predictions of
+the model on the evaluation dataset.</p></li>
+</ol>
+</section>
+<section id="run-a-prediction">
+<h3>Run a prediction<a class="headerlink" href="#run-a-prediction" title="Link to this heading">#</a></h3>
+<p>To run a prediction from a model generated by a <cite>SDeep</cite> training, we just need to run the
+<code class="docutils literal notranslate"><span class="pre">sdpredict</span></code> command. This command can be ran on a file:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sdpredict<span class="w"> </span>-i<span class="w"> </span>filepath.tif<span class="w"> </span>-o<span class="w"> </span>prediction.tif<span class="w"> </span>-m<span class="w"> </span>model.ml
+</pre></div>
+</div>
+<p>or on a directory</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sdpredict<span class="w"> </span>-i<span class="w"> </span>input_dir/<span class="w"> </span>-o<span class="w"> </span>output_dir/<span class="w"> </span>-m<span class="w"> </span>model.ml<span class="w"> </span>--e<span class="w"> </span><span class="s2">&quot;.tif&quot;</span>
+</pre></div>
+</div>
+<p>There is no need to transform the data before calling the <code class="docutils literal notranslate"><span class="pre">sdpredict</span></code> command because the command
+will automatically apply the validation set transform used during the training.</p>
+</section>
+<section id="create-custom-modules">
+<h3>Create custom modules<a class="headerlink" href="#create-custom-modules" title="Link to this heading">#</a></h3>
+<p>The main goal of the <cite>SDeep</cite> framework is to be able to create custom models, loss or even
+workflows. In the following we are going step by step in how to create a custom module for training
+a model.</p>
+<p>First, we need a directory where we will create a python module that follows the <cite>SDeep</cite>
+architecture.
+Basically, the <cite>SDeep</cite> command line tool will search for modules who’s name starts with <cite>sd_</cite> and
+contains submodules names as the <cite>SDeep</cite> modules (datasets, evals, losses, models, optims,
+transforms, workflows). All the modules are not mandatory, and we can implement only the one we
+need.</p>
+<p>Thus two architecture of the python module are possible. If we need to implement only one module
+per component, we can just create a module file per component:</p>
+<div class="line-block">
+<div class="line">my_project</div>
+<div class="line-block">
+<div class="line">|– __init__.py</div>
+<div class="line">|– datasets.py</div>
+<div class="line">|– evals.py</div>
+<div class="line">|– losses.py</div>
+<div class="line">|– models.py</div>
+<div class="line">|– optims.py</div>
+<div class="line">|– transforms.py</div>
+<div class="line">|– workflows.py</div>
+</div>
+</div>
+<p>If we plan to implement multiple modules per components, it may be more clear to separate them
+into sub modules using directories:</p>
+<div class="line-block">
+<div class="line">my_project</div>
+<div class="line-block">
+<div class="line">|– __init__.py</div>
+<div class="line">|– datasets</div>
+<div class="line-block">
+<div class="line">|– __init__.py</div>
+<div class="line">|– dataset1.py</div>
+<div class="line">|– dataset2.py</div>
+</div>
+<div class="line">|– evals.py</div>
+<div class="line">|– losses.py</div>
+<div class="line">|– models.py</div>
+<div class="line">|– optims.py</div>
+<div class="line">|– transforms.py</div>
+<div class="line">|– workflows.py</div>
+</div>
+</div>
+<p>Finaly, to enable <cite>SDeep</cite> to instantiate dynamically the modules, we need to declare them using
+the export variable. This means that in each module file, their should be a line similar to</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="o">=</span> <span class="p">[</span><span class="n">MyDatasetA</span><span class="p">,</span> <span class="n">MyDatasetB</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Lets write a full example with a dataset only. Consider we want to create a dataset for image
+denoising using the MNIST dataset.</p>
+<p>We first create a directory for our python module:</p>
+<div class="line-block">
+<div class="line">my_denoising</div>
+<div class="line-block">
+<div class="line">|– __init__.py</div>
+<div class="line">|– datasets.py</div>
+</div>
+<div class="line">params.json</div>
+</div>
+<p>The <cite>__init__.py</cite> file can stay empty, it only declare the python module. In the
+<cite>dataset.py</cite> file we can create our dataset as a regular <cite>PyTorch</cite> dataset</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torchvision.datasets</span> <span class="kn">import</span> <span class="n">MNIST</span>
+
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
+
+
+<span class="k">class</span> <span class="nc">MNISTDenoising</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dataset to use the MNIST data for image denoising</span>
+
+<span class="sd">    :param dir_name: Directory where the MNIST data are downloaded locally,</span>
+<span class="sd">    :param noise_sigma: Standard deviation of the random gaussian noise to add,</span>
+<span class="sd">    :param train: True to use train set, false to use test set,</span>
+<span class="sd">    :param transform: Transformation to apply to the input images (data augmentation)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">dir_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">noise_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.025</span>
+                 <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mnist</span> <span class="o">=</span> <span class="n">MNIST</span><span class="p">(</span><span class="n">dir_name</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_sigma</span> <span class="o">=</span> <span class="n">noise_sigma</span>
+
+    <span class="k">def</span> <span class="nf">add_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add Gaussian noise to an image</span>
+
+<span class="sd">        :param image: Image to process,</span>
+<span class="sd">        :return: The image with added noise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">noise_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_sigma</span><span class="p">,</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">image</span> <span class="o">+</span> <span class="n">noise_img</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mnist</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mnist</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">noisy_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_noise</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">noisy_img</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">noisy_img</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">noisy_img</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">),</span> <span class="n">img</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+
+<span class="n">export</span> <span class="o">=</span> <span class="p">[</span><span class="n">MNISTDenoising</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The we can create a <cite>params.json</cite> file with the training parameters:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;model&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;UNet&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;n_channels_in&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;n_channels_out&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;n_feature_first&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">32</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;use_batch_norm&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;loss&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;MSELoss&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;optim&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Adam&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;lr&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">0.001</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;workflow&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;RestorationWorkflow&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;epochs&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">10</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;train_batch_size&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">64</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;val_batch_size&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1000</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;save_all&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;use_tiling&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;train_dataset&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;MNISTDenoising&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;dir_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;mnist_train&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;noise_sigma&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">0.025</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;train&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;val_dataset&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;MNISTDenoising&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;dir_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;mnist_train&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;noise_sigma&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">0.025</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;train&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;eval&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;EvalRestoration&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Here we didn’t use data transform for simplification. We can then run the training with the
+<cite>SDeep</cite> train command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+sdtrain<span class="w"> </span>-p<span class="w"> </span>params.json
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If <cite>SDeep</cite> does not find your module, you can either install it in the same env as <cite>SDeep</cite> or
+use the option <em>-c</em> to declare your directory to SDeep:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sdtrain<span class="w"> </span>-p<span class="w"> </span>params.json<span class="w"> </span>-c<span class="w"> </span>/path/to/my_denoising
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="install.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Install</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="modules.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Modules</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design">Design</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to">How to</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-a-training">Run a training</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-a-prediction">Run a prediction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-custom-modules">Create custom modules</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sylvain Prigent
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Sylvain Prigent.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

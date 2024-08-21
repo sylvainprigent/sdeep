@@ -1,0 +1,706 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Modules &#8212; SciXTracer 0.0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=c01ab6dc" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=e645c8fa"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'modules';</script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sdeep.interfaces.SDataset" href="generated/sdeep.interfaces.SDataset.html" />
+    <link rel="prev" title="Guide" href="guide.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">SciXTracer 0.0.1 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Guide</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Modules</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.SDataset.html">sdeep.interfaces.SDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.SEval.html">sdeep.interfaces.SEval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.SModel.html">sdeep.interfaces.SModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.STransform.html">sdeep.interfaces.STransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.interfaces.SWorkflow.html">sdeep.interfaces.SWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.SWorkflowBase.html">sdeep.workflows.SWorkflowBase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.ClassificationWorkflow.html">sdeep.workflows.ClassificationWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.RestorationWorkflow.html">sdeep.workflows.RestorationWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.SegmentationWorkflow.html">sdeep.workflows.SegmentationWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.workflows.SelfSupervisedWorkflow.html">sdeep.workflows.SelfSupervisedWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.evals.EvalClassification.html">sdeep.evals.EvalClassification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.evals.EvalRestoration.html">sdeep.evals.EvalRestoration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.Autoencoder.html">sdeep.models.Autoencoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.DnCNN.html">sdeep.models.DnCNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.DeepFinder.html">sdeep.models.DeepFinder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.DRUNet.html">sdeep.models.DRUNet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.MNistClassifier.html">sdeep.models.MNistClassifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.models.UNet.html">sdeep.models.UNet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.DeconMSEHessian.html">sdeep.losses.DeconMSEHessian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.DeconSpitfire.html">sdeep.losses.DeconSpitfire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.DiceLoss.html">sdeep.losses.DiceLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.BinaryDiceLoss.html">sdeep.losses.BinaryDiceLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.VGGL1PerceptualLoss.html">sdeep.losses.VGGL1PerceptualLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.N2XDenoise.html">sdeep.losses.N2XDenoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.N2XDecon.html">sdeep.losses.N2XDecon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.losses.TverskyLoss.html">sdeep.losses.TverskyLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.MNISTClassif.html">sdeep.datasets.MNISTClassif</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.MNISTAutoencoder.html">sdeep.datasets.MNISTAutoencoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.RestorationDataset.html">sdeep.datasets.RestorationDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.RestorationPatchDataset.html">sdeep.datasets.RestorationPatchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.RestorationPatchDatasetLoad.html">sdeep.datasets.RestorationPatchDatasetLoad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.SegmentationDataset.html">sdeep.datasets.SegmentationDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.SegmentationPatchDataset.html">sdeep.datasets.SegmentationPatchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.SelfSupervisedDataset.html">sdeep.datasets.SelfSupervisedDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.datasets.SelfSupervisedPatchDataset.html">sdeep.datasets.SelfSupervisedPatchDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.transforms.FlipAugmentation.html">sdeep.transforms.FlipAugmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.transforms.RestorationAugmentation.html">sdeep.transforms.RestorationAugmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.transforms.VisionScale.html">sdeep.transforms.VisionScale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/sdeep.transforms.VisionCrop.html">sdeep.transforms.VisionCrop</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/modules.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Modules</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#interfaces">Interfaces</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#workflows">Workflows</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eval">Eval</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#models">Models</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#losses">Losses</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#datasets">Datasets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transforms">Transforms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optims">Optims</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Link to this heading">#</a></h1>
+<p>Most of the modules used by SDeep inherit from <cite>PyTorch</cite> modules. The two modules specific to
+<cite>SDeep</cite> are <a class="reference internal" href="generated/sdeep.interfaces.SWorkflow.html#sdeep.interfaces.SWorkflow" title="sdeep.interfaces.workflow.SWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">SWorkflow</span></code></a>
+and <a class="reference internal" href="generated/sdeep.interfaces.SEval.html#sdeep.interfaces.SEval" title="sdeep.interfaces.SEval"><code class="xref py py-class docutils literal notranslate"><span class="pre">Eval</span></code></a></p>
+<div class="pst-scrollable-table-container"><table class="table" id="id1">
+<caption><span class="caption-text">SDeep main modules</span><a class="headerlink" href="#id1" title="Link to this table">#</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#emulating-callable-objects">Transform</a></p></td>
+<td><p>Callable to transform a tensor into another tensor of same shape</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset">Dataset</a></p></td>
+<td><p>Read and apply transform to data for training or validation</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module">Module</a></p></td>
+<td><p>Neural network as a <cite>PyTorch</cite> module</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module">Loss</a></p></td>
+<td><p>Loss function to be minimized. Implemented as a <cite>PyTorch</cite> module</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer">Optim</a></p></td>
+<td><p>Optimizer for back-propagation. Implemented as a <cite>PyTorch</cite> optimizer</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.interfaces.SEval.html#sdeep.interfaces.SEval" title="sdeep.interfaces.SEval"><code class="xref py py-class docutils literal notranslate"><span class="pre">SEval</span></code></a></p></td>
+<td><p>Implements the evaluation metrics and write evaluation output files</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.interfaces.SWorkflow.html#sdeep.interfaces.SWorkflow" title="sdeep.interfaces.workflow.SWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">SWorkflow</span></code></a></p></td>
+<td><p>Implements the training strategy</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="interfaces">
+<h2>Interfaces<a class="headerlink" href="#interfaces" title="Link to this heading">#</a></h2>
+<p>Interfaces are the core of the framework to define modules that store metadata and allows to
+efficiently build training and prediction workflows.</p>
+<p>The available interfaces are:</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.interfaces.SDataset.html#sdeep.interfaces.SDataset" title="sdeep.interfaces.SDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SDataset</span></code></a></p></td>
+<td><p>Interface for a dataset compatible with the framework</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.interfaces.SEval.html#sdeep.interfaces.SEval" title="sdeep.interfaces.SEval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SEval</span></code></a></p></td>
+<td><p>Interface for the evaluation modules</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.interfaces.SModel.html#sdeep.interfaces.SModel" title="sdeep.interfaces.SModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SModel</span></code></a></p></td>
+<td><p>Interface for a model compatible with the framework</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.interfaces.STransform.html#sdeep.interfaces.STransform" title="sdeep.interfaces.STransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STransform</span></code></a></p></td>
+<td><p>Interface for a data transform compatible with the framework</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.interfaces.SWorkflow.html#sdeep.interfaces.SWorkflow" title="sdeep.interfaces.SWorkflow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SWorkflow</span></code></a></p></td>
+<td><p>Default workflow to train and predict a neural network</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="workflows">
+<h2>Workflows<a class="headerlink" href="#workflows" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.workflows.SWorkflowBase.html#sdeep.workflows.SWorkflowBase" title="sdeep.workflows.SWorkflowBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SWorkflowBase</span></code></a></p></td>
+<td><p>Default workflow to train and predict a neural network</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.workflows.ClassificationWorkflow.html#sdeep.workflows.ClassificationWorkflow" title="sdeep.workflows.ClassificationWorkflow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ClassificationWorkflow</span></code></a></p></td>
+<td><p>Workflow to train and predict a classification neural network</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.workflows.RestorationWorkflow.html#sdeep.workflows.RestorationWorkflow" title="sdeep.workflows.RestorationWorkflow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RestorationWorkflow</span></code></a></p></td>
+<td><p>Workflow to train and predict a restoration neural network</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.workflows.SegmentationWorkflow.html#sdeep.workflows.SegmentationWorkflow" title="sdeep.workflows.SegmentationWorkflow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentationWorkflow</span></code></a></p></td>
+<td><p>Workflow to train and predict a semantic segmentation neural network</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.workflows.SelfSupervisedWorkflow.html#sdeep.workflows.SelfSupervisedWorkflow" title="sdeep.workflows.SelfSupervisedWorkflow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SelfSupervisedWorkflow</span></code></a></p></td>
+<td><p>Workflow to train and predict a restoration neural network</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="eval">
+<h2>Eval<a class="headerlink" href="#eval" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.evals.EvalClassification.html#sdeep.evals.EvalClassification" title="sdeep.evals.EvalClassification"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EvalClassification</span></code></a></p></td>
+<td><p>Generate an evaluation of classification results</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.evals.EvalRestoration.html#sdeep.evals.EvalRestoration" title="sdeep.evals.EvalRestoration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EvalRestoration</span></code></a></p></td>
+<td><p>Generate an evaluation of denoising results</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="models">
+<h2>Models<a class="headerlink" href="#models" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.models.Autoencoder.html#sdeep.models.Autoencoder" title="sdeep.models.Autoencoder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Autoencoder</span></code></a></p></td>
+<td><p>Implementation of image autoencoder network</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.models.DnCNN.html#sdeep.models.DnCNN" title="sdeep.models.DnCNN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DnCNN</span></code></a></p></td>
+<td><p>Implementation of the DnCNN network</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.models.DeepFinder.html#sdeep.models.DeepFinder" title="sdeep.models.DeepFinder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DeepFinder</span></code></a></p></td>
+<td><p>Implementation of a 2D version of the DeepFinder UNet model</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.models.DRUNet.html#sdeep.models.DRUNet" title="sdeep.models.DRUNet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DRUNet</span></code></a></p></td>
+<td><p>Implementation of the DRUNet network</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.models.MNistClassifier.html#sdeep.models.MNistClassifier" title="sdeep.models.MNistClassifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MNistClassifier</span></code></a></p></td>
+<td><p>Basic classifier for the MNist dataset to test and demo the classification framework</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.models.UNet.html#sdeep.models.UNet" title="sdeep.models.UNet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNet</span></code></a></p></td>
+<td><p>Implementation of a UNet network</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="losses">
+<h2>Losses<a class="headerlink" href="#losses" title="Link to this heading">#</a></h2>
+<p>Losses listed in the documentation are the one implemented in <cite>SDeep</cite>. Any <cite>PyTorch</cite> loss can be
+made accessible to the <cite>SDeep</cite> framework using the <code class="docutils literal notranslate"><span class="pre">export=[MyLoss]</span></code> in the losses module.
+By default <cite>PyTorch</cite> available losses are:</p>
+<ul class="simple">
+<li><p><cite>MSELoss</cite></p></li>
+<li><p><cite>L1Loss</cite></p></li>
+<li><p><cite>BCELoss</cite></p></li>
+<li><p><cite>BCEWithLogitsLoss</cite></p></li>
+<li><p><cite>CrossEntropyLoss</cite></p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.losses.DeconMSEHessian.html#sdeep.losses.DeconMSEHessian" title="sdeep.losses.DeconMSEHessian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DeconMSEHessian</span></code></a></p></td>
+<td><p>MSE LOSS with a (de)convolution filter and Hessian regularization</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.losses.DeconSpitfire.html#sdeep.losses.DeconSpitfire" title="sdeep.losses.DeconSpitfire"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DeconSpitfire</span></code></a></p></td>
+<td><p>MSE LOSS with a (de)convolution filter and Spitfire regularisation</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.losses.DiceLoss.html#sdeep.losses.DiceLoss" title="sdeep.losses.DiceLoss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DiceLoss</span></code></a></p></td>
+<td><p>Multiclass Dice loss using one hot encode input</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.losses.BinaryDiceLoss.html#sdeep.losses.BinaryDiceLoss" title="sdeep.losses.BinaryDiceLoss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BinaryDiceLoss</span></code></a></p></td>
+<td><p>Dice loss for binary classification</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.losses.VGGL1PerceptualLoss.html#sdeep.losses.VGGL1PerceptualLoss" title="sdeep.losses.VGGL1PerceptualLoss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VGGL1PerceptualLoss</span></code></a></p></td>
+<td><p>VGG based perceptual loss</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.losses.N2XDenoise.html#sdeep.losses.N2XDenoise" title="sdeep.losses.N2XDenoise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">N2XDenoise</span></code></a></p></td>
+<td><p>MSE Loss with mask for Noise2Void denoising</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.losses.N2XDecon.html#sdeep.losses.N2XDecon" title="sdeep.losses.N2XDecon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">N2XDecon</span></code></a></p></td>
+<td><p>MSE Loss with mask for Noise2Void deconvolution</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.losses.TverskyLoss.html#sdeep.losses.TverskyLoss" title="sdeep.losses.TverskyLoss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TverskyLoss</span></code></a></p></td>
+<td><p>Tversky loss for instance segmentation</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="datasets">
+<h2>Datasets<a class="headerlink" href="#datasets" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.datasets.MNISTClassif.html#sdeep.datasets.MNISTClassif" title="sdeep.datasets.MNISTClassif"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MNISTClassif</span></code></a></p></td>
+<td><p>Dataset to load MNIST dataset for image classification</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.datasets.MNISTAutoencoder.html#sdeep.datasets.MNISTAutoencoder" title="sdeep.datasets.MNISTAutoencoder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MNISTAutoencoder</span></code></a></p></td>
+<td><p>Dataset to use the MNIST data for autoencoders</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.datasets.RestorationDataset.html#sdeep.datasets.RestorationDataset" title="sdeep.datasets.RestorationDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RestorationDataset</span></code></a></p></td>
+<td><p>Dataset for image restoration from full images</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.datasets.RestorationPatchDataset.html#sdeep.datasets.RestorationPatchDataset" title="sdeep.datasets.RestorationPatchDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RestorationPatchDataset</span></code></a></p></td>
+<td><p>Dataset for image restoration using patches</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.datasets.RestorationPatchDatasetLoad.html#sdeep.datasets.RestorationPatchDatasetLoad" title="sdeep.datasets.RestorationPatchDatasetLoad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RestorationPatchDatasetLoad</span></code></a></p></td>
+<td><p>Dataset for image restoration using patches preloaded in memory</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.datasets.SegmentationDataset.html#sdeep.datasets.SegmentationDataset" title="sdeep.datasets.SegmentationDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentationDataset</span></code></a></p></td>
+<td><p>Dataset for image segmentation where images are stored in a single directory</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.datasets.SegmentationPatchDataset.html#sdeep.datasets.SegmentationPatchDataset" title="sdeep.datasets.SegmentationPatchDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentationPatchDataset</span></code></a></p></td>
+<td><p>Dataset for image segmentation where images are partitioned into patches</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.datasets.SelfSupervisedDataset.html#sdeep.datasets.SelfSupervisedDataset" title="sdeep.datasets.SelfSupervisedDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SelfSupervisedDataset</span></code></a></p></td>
+<td><p>Gray scaled image patch dataset for Self supervised learning</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.datasets.SelfSupervisedPatchDataset.html#sdeep.datasets.SelfSupervisedPatchDataset" title="sdeep.datasets.SelfSupervisedPatchDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SelfSupervisedPatchDataset</span></code></a></p></td>
+<td><p>Gray scaled image patch dataset for Self supervised learning</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="transforms">
+<h2>Transforms<a class="headerlink" href="#transforms" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.transforms.FlipAugmentation.html#sdeep.transforms.FlipAugmentation" title="sdeep.transforms.FlipAugmentation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlipAugmentation</span></code></a></p></td>
+<td><p>Data augmentation by flipping images</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.transforms.RestorationAugmentation.html#sdeep.transforms.RestorationAugmentation" title="sdeep.transforms.RestorationAugmentation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RestorationAugmentation</span></code></a></p></td>
+<td><p>Data augmentation flipping images</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/sdeep.transforms.VisionScale.html#sdeep.transforms.VisionScale" title="sdeep.transforms.VisionScale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VisionScale</span></code></a></p></td>
+<td><p>Scale images in [-1, 1]</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/sdeep.transforms.VisionCrop.html#sdeep.transforms.VisionCrop" title="sdeep.transforms.VisionCrop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VisionCrop</span></code></a></p></td>
+<td><p>Crop the images at the center</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="optims">
+<h2>Optims<a class="headerlink" href="#optims" title="Link to this heading">#</a></h2>
+<p><cite>SDeep</cite> uses optimizers from <cite>PyTorch</cite>. Current available optimizers are:</p>
+<ul class="simple">
+<li><p>Adam</p></li>
+<li><p>SGD</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="guide.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Guide</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="generated/sdeep.interfaces.SDataset.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">sdeep.interfaces.SDataset</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#interfaces">Interfaces</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#workflows">Workflows</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eval">Eval</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#models">Models</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#losses">Losses</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#datasets">Datasets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transforms">Transforms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optims">Optims</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sylvain Prigent
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Sylvain Prigent.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
