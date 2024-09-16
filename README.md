@@ -4,7 +4,7 @@ Set of deep learning models for image restoration and analysis
 
 # Documentation
 
-The documentation is not yet available
+The documentation is available [here](https://sylvainprigent.github.io/sdeep/about.html)
 
 # Get started
 
