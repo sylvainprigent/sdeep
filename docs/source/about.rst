@@ -1,4 +1,4 @@
-About
+SDeep
 =====
 
 `SDeep` is a python framework based on ``PyTorch`` to ease the training of light deep learning models locally.

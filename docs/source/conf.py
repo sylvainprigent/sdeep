@@ -9,7 +9,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
 
-project = 'SciXTracer'
+project = 'SDeep'
 copyright = '2024, Sylvain Prigent'
 author = 'Sylvain Prigent'
 release = '0.0.1'

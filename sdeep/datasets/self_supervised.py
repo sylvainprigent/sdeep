@@ -97,7 +97,7 @@ class SelfSupervisedDataset(Dataset):
         img_patch = self.images_data[idx]
         if self.transform:
             img_patch = self.transform(torch.Tensor(img_patch))
-
+          
         return (
             img_patch.view(1, *img_patch.shape),
             self.source_images[idx].stem

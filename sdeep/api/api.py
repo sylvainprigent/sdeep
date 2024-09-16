@@ -180,17 +180,21 @@ class SDeepAPI:
         print('loaded model:')
         print("params['model']=", params['model'])
         print("params['model_args']=", params['model_args'])
-        print("params['transform']=", params['transform'])
+        if "transform" in params:
+            print("params['transform']=", params['transform'])
 
         model = self.__factory.get_model(params['model'], params['model_args']).model
         model.load_state_dict(params['model_state_dict'])
         model.to(device())
 
-        transform_name = params['transform']['name']
-        transform_args = params['transform'].copy()
-        transform_args.pop('name')
+        if "transform" in params:
+            transform_name = params['transform']['name']
+            transform_args = params['transform'].copy()
+            transform_args.pop('name')
 
-        transform = self.__factory.get_transform(transform_name, transform_args)
+            transform = self.__factory.get_transform(transform_name, transform_args)
+        else:
+            transform = None
 
         return SModel(model, params['model_args']), transform
 

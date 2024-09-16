@@ -128,7 +128,7 @@ class UNet(nn.Module):
         super().__init__()
 
         self.receptive_field = 32
-        self.input_shape = (32, 32)
+        self.input_shape = (1, 32, 32)
         # Encoder
         self.e1 = UNetEncoderBlock(n_channels_in, n_feature_first,
                                    use_batch_norm)
